@@ -955,4 +955,3 @@ Ne pas chercher à faire un modèle parfait immédiatement.
 
 L’objectif est d’obtenir un premier indicateur lisible dans Grafana.
 
-```
