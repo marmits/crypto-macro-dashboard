@@ -4,8 +4,26 @@ from typing import Any
 
 import requests
 
-from config import DB_PATH, FRED_API_KEY, FRED_BASE_URL, FRED_SERIES
-
+from config import (
+    DB_PATH,
+    FRED_API_KEY,
+    FRED_BASE_URL,
+    FRED_SERIES,
+    COINGECKO_BASE_URL,
+    COINGECKO_COINS,
+)
+"""
+version avec api key de coingecko
+from config import (
+    DB_PATH,
+    FRED_API_KEY,
+    FRED_BASE_URL,
+    FRED_SERIES,
+    COINGECKO_API_KEY,
+    COINGECKO_BASE_URL,
+    COINGECKO_COINS,
+)
+"""
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -13,6 +31,10 @@ def now_iso() -> str:
 
 def fred_date_to_iso(date_value: str) -> str:
     return f"{date_value}T00:00:00+00:00"
+
+
+def unix_timestamp_to_iso(timestamp: int | float) -> str:
+    return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()
 
 
 def create_schema(connection: sqlite3.Connection) -> None:
@@ -66,7 +88,6 @@ def fetch_fred_observations(series_id: str, limit: int = 12) -> list[dict[str, A
     response.raise_for_status()
 
     payload = response.json()
-
     observations = payload.get("observations", [])
 
     cleaned_observations = []
@@ -85,6 +106,40 @@ def fetch_fred_observations(series_id: str, limit: int = 12) -> list[dict[str, A
         )
 
     return list(reversed(cleaned_observations))
+
+
+def fetch_coingecko_simple_price(coin_id: str) -> dict[str, Any]:
+    url = f"{COINGECKO_BASE_URL}/simple/price"
+
+    params = {
+        "ids": coin_id,
+        "vs_currencies": "usd",
+        "include_24hr_change": "true",
+        "include_last_updated_at": "true",
+    }
+
+    headers = {
+        "accept": "application/json",
+    }
+
+    """ if COINGECKO_API_KEY:
+        headers["x-cg-demo-api-key"] = COINGECKO_API_KEY
+    """
+
+    response = requests.get(url, params=params, headers=headers, timeout=30)
+    response.raise_for_status()
+
+    payload = response.json()
+
+    if coin_id not in payload:
+        raise RuntimeError(f"Réponse CoinGecko inattendue : coin absent '{coin_id}'")
+
+    coin_payload = payload[coin_id]
+
+    if "usd" not in coin_payload:
+        raise RuntimeError(f"Réponse CoinGecko inattendue : prix USD absent pour '{coin_id}'")
+
+    return coin_payload
 
 
 def upsert_macro_observation(
@@ -150,6 +205,49 @@ def collect_fred_series(connection: sqlite3.Connection, series_id: str) -> None:
     print(f"{len(observations)} observation(s) FRED traitée(s) pour {series_id}.")
 
 
+def collect_coingecko_coin(connection: sqlite3.Connection, coin_id: str) -> None:
+    coin_config = COINGECKO_COINS[coin_id]
+
+    print(f"Collecte CoinGecko en cours : {coin_id}")
+
+    coin_payload = fetch_coingecko_simple_price(coin_id)
+
+    price = float(coin_payload["usd"])
+
+    last_updated_at = coin_payload.get("last_updated_at")
+
+    if last_updated_at:
+        observed_at = unix_timestamp_to_iso(last_updated_at)
+    else:
+        observed_at = now_iso()
+
+    upsert_macro_observation(
+        connection=connection,
+        source=coin_config["source"],
+        symbol=coin_config["symbol"],
+        name=coin_config["name"],
+        value=price,
+        unit=coin_config["unit"],
+        observed_at=observed_at,
+    )
+
+    change_24h = coin_payload.get("usd_24h_change")
+
+    print(
+        {
+            "source": coin_config["source"],
+            "symbol": coin_config["symbol"],
+            "name": coin_config["name"],
+            "value": price,
+            "unit": coin_config["unit"],
+            "observed_at": observed_at,
+            "usd_24h_change": change_24h,
+        }
+    )
+
+    print(f"Observation CoinGecko traitée pour {coin_config['symbol']}.")
+
+
 def print_existing_rows(connection: sqlite3.Connection) -> None:
     rows = connection.execute(
         """
@@ -164,7 +262,7 @@ def print_existing_rows(connection: sqlite3.Connection) -> None:
             created_at
         FROM macro_series
         ORDER BY observed_at DESC, id DESC
-        LIMIT 15
+        LIMIT 20
         """
     ).fetchall()
 
@@ -199,10 +297,11 @@ def main() -> None:
         create_schema(connection)
 
         collect_fred_series(connection, "FEDFUNDS")
+        collect_coingecko_coin(connection, "bitcoin")
 
         connection.commit()
 
-        print("Collecte FRED terminée avec succès.")
+        print("Collectes terminées avec succès.")
 
         print_existing_rows(connection)
 
