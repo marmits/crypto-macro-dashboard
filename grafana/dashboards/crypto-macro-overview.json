@@ -1,79 +1,36 @@
 {
-  "id": null,
-  "uid": "crypto-macro-overview-sqlite-v2",
-  "title": "Crypto Macro Overview SQLite",
-  "tags": [
-    "crypto",
-    "macro",
-    "fred",
-    "sqlite",
-    "coingecko"
-  ],
-  "timezone": "browser",
-  "schemaVersion": 39,
-  "version": 2,
-  "refresh": "30s",
-  "time": {
-    "from": "now-2y",
-    "to": "now"
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
   },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "liveNow": false,
   "panels": [
     {
-      "id": 1,
-      "type": "stat",
-      "title": "Dernier FEDFUNDS",
       "datasource": {
         "type": "frser-sqlite-datasource",
         "uid": "macro-sqlite"
       },
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 0,
-        "y": 0
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "format": "table",
-          "queryType": "raw",
-          "rawQuery": true,
-          "queryText": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
-          "rawQueryText": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
-          "rawSql": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "wideLayout": true,
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "showPercentChange": false,
-        "percentChangeColorMode": "standard"
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
           "decimals": 2,
-          "min": 0,
           "max": 100,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -90,18 +47,76 @@
                 "value": 5
               }
             ]
-          }
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "overrides": []
-      }
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "format": "table",
+          "queryText": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
+          "queryType": "raw",
+          "rawQuery": true,
+          "rawQueryText": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
+          "rawSql": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Dernier FEDFUNDS",
+      "type": "stat"
     },
     {
-      "id": 2,
-      "type": "stat",
-      "title": "Dernier BTC/USD",
       "datasource": {
         "type": "frser-sqlite-datasource",
         "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
       },
       "gridPos": {
         "h": 6,
@@ -109,46 +124,92 @@
         "x": 6,
         "y": 0
       },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
           "format": "table",
+          "queryText": "SELECT value FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at DESC LIMIT 1;",
           "queryType": "raw",
           "rawQuery": true,
-          "queryText": "SELECT value FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at DESC LIMIT 1;",
           "rawQueryText": "SELECT value FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at DESC LIMIT 1;",
           "rawSql": "SELECT value FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at DESC LIMIT 1;",
+          "refId": "A",
           "timeColumns": [
             "time",
             "ts"
           ]
         }
       ],
-      "options": {
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
-        },
-        "orientation": "auto",
-        "textMode": "auto",
-        "wideLayout": true,
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "showPercentChange": false,
-        "percentChangeColorMode": "standard"
+      "title": "Dernier BTC/USD",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "currencyUSD",
-          "decimals": 0,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Taux (%)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -157,18 +218,9 @@
                 "value": 0
               }
             ]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 3,
-      "type": "timeseries",
-      "title": "FEDFUNDS — Federal Funds Effective Rate",
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
+          },
+          "unit": "percent"
+        }
       },
       "gridPos": {
         "h": 9,
@@ -176,77 +228,92 @@
         "x": 12,
         "y": 0
       },
+      "id": 3,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.2",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
           "format": "time_series",
+          "queryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
           "queryType": "raw",
           "rawQuery": true,
-          "queryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
           "rawQueryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
           "rawSql": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
+          "refId": "A",
           "timeColumns": [
             "time",
             "ts"
           ]
         }
       ],
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+      "title": "FEDFUNDS — Federal Funds Effective Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "percent",
-          "decimals": 2,
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "linear",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "lineWidth": 2,
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "spanNulls": false,
-            "insertNulls": false,
-            "showPoints": "auto",
-            "showValues": false,
-            "pointSize": 5,
-            "stacking": {
-              "mode": "none",
-              "group": "A"
-            },
-            "axisPlacement": "auto",
-            "axisLabel": "Taux (%)",
-            "axisColorMode": "text",
             "axisBorderShow": false,
             "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Prix USD",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 6,
             "scaleDistribution": {
               "type": "linear"
             },
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
+            "showPoints": "always",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
             }
           },
+          "decimals": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -255,18 +322,9 @@
                 "value": 0
               }
             ]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 4,
-      "type": "timeseries",
-      "title": "BTC/USD — CoinGecko",
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
+          },
+          "unit": "currencyUSD"
+        }
       },
       "gridPos": {
         "h": 9,
@@ -274,76 +332,63 @@
         "x": 0,
         "y": 6
       },
+      "id": 4,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.2",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
           "format": "time_series",
+          "queryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS BTC_USD FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at ASC;",
           "queryType": "raw",
           "rawQuery": true,
-          "queryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS BTC_USD FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at ASC;",
           "rawQueryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS BTC_USD FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at ASC;",
           "rawSql": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS BTC_USD FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at ASC;",
+          "refId": "A",
           "timeColumns": [
             "time",
             "ts"
           ]
         }
       ],
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+      "title": "BTC/USD — CoinGecko",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "currencyUSD",
-          "decimals": 0,
-          "color": {
-            "mode": "palette-classic"
-          },
           "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "linear",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "lineWidth": 2,
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "spanNulls": false,
-            "insertNulls": false,
-            "showPoints": "always",
-            "showValues": false,
-            "pointSize": 6,
-            "stacking": {
-              "mode": "none",
-              "group": "A"
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
             },
-            "axisPlacement": "auto",
-            "axisLabel": "Prix USD",
-            "axisColorMode": "text",
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "scaleDistribution": {
-              "type": "linear"
+            "footer": {
+              "reducers": []
             },
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "inspect": false
           },
           "thresholds": {
             "mode": "absolute",
@@ -351,20 +396,14 @@
               {
                 "color": "green",
                 "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 5,
-      "type": "table",
-      "title": "Données crypto",
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
+        }
       },
       "gridPos": {
         "h": 9,
@@ -372,28 +411,38 @@
         "x": 12,
         "y": 9
       },
+      "id": 5,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "13.0.2",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
           "format": "table",
+          "queryText": "SELECT\n  id,\n  symbol,\n  name,\n  value,\n  unit,\n  observed_at,\n  created_at\nFROM macro_series\nWHERE source = 'coingecko'\nORDER BY observed_at DESC, symbol ASC\nLIMIT 50; ",
           "queryType": "raw",
           "rawQuery": true,
-          "queryText": "SELECT\n  id,\n  source,\n  symbol,\n  name,\n  value,\n  unit,\n  observed_at,\n  created_at\nFROM macro_series\nWHERE source = 'coingecko'\nORDER BY observed_at DESC, id DESC\nLIMIT 50;",
-          "rawQueryText": "SELECT\n  id,\n  source,\n  symbol,\n  name,\n  value,\n  unit,\n  observed_at,\n  created_at\nFROM macro_series\nWHERE source = 'coingecko'\nORDER BY observed_at DESC, id DESC\nLIMIT 50;",
+          "rawQueryText": "SELECT\n  id,\n  symbol,\n  name,\n  value,\n  unit,\n  observed_at,\n  created_at\nFROM macro_series\nWHERE source = 'coingecko'\nORDER BY observed_at DESC, symbol ASC\nLIMIT 50; ",
           "rawSql": "SELECT id, source, symbol, name, value, unit, observed_at, created_at FROM macro_series WHERE source = 'coingecko' ORDER BY observed_at DESC, id DESC LIMIT 50;",
+          "refId": "A",
           "timeColumns": [
             "time",
             "ts"
           ]
         }
       ],
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
+      "title": "Données crypto",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
       },
       "fieldConfig": {
         "defaults": {
@@ -420,17 +469,7 @@
               }
             ]
           }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "id": 6,
-      "type": "table",
-      "title": "Dernières données macro_series",
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
+        }
       },
       "gridPos": {
         "h": 9,
@@ -438,40 +477,43 @@
         "x": 0,
         "y": 18
       },
+      "id": 6,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "13.0.2",
       "targets": [
         {
-          "refId": "A",
           "datasource": {
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
           "format": "table",
+          "queryText": "SELECT\n  id,\n  source,\n  symbol,\n  name,\n  value,\n  unit,\n  observed_at,\n  created_at\nFROM macro_series\nORDER BY observed_at DESC, id DESC\nLIMIT 50;",
           "queryType": "raw",
           "rawQuery": true,
-          "queryText": "SELECT\n  id,\n  source,\n  symbol,\n  name,\n  value,\n  unit,\n  observed_at,\n  created_at\nFROM macro_series\nORDER BY observed_at DESC, id DESC\nLIMIT 50;",
           "rawQueryText": "SELECT\n  id,\n  source,\n  symbol,\n  name,\n  value,\n  unit,\n  observed_at,\n  created_at\nFROM macro_series\nORDER BY observed_at DESC, id DESC\nLIMIT 50;",
           "rawSql": "SELECT id, source, symbol, name, value, unit, observed_at, created_at FROM macro_series ORDER BY observed_at DESC, id DESC LIMIT 50;",
+          "refId": "A",
           "timeColumns": [
             "time",
             "ts"
           ]
         }
       ],
-      "options": {
-        "showHeader": true,
-        "cellHeight": "sm"
+      "title": "Dernières données macro_series",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
       },
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "footer": {
-              "reducers": []
-            },
-            "inspect": false
+          "color": {
+            "mode": "thresholds"
           },
           "thresholds": {
             "mode": "absolute",
@@ -485,10 +527,120 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 27
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "overrides": []
-      }
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT value AS BTC_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'BTC'\nORDER BY observed_at DESC\nLIMIT 1;  ",
+          "queryType": "table",
+          "rawQueryText": "SELECT value AS BTC_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'BTC'\nORDER BY observed_at DESC\nLIMIT 1;  ",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        },
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT value AS ETH_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'ETH'\nORDER BY observed_at DESC\nLIMIT 1;",
+          "queryType": "table",
+          "rawQueryText": "SELECT value AS ETH_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'ETH'\nORDER BY observed_at DESC\nLIMIT 1;",
+          "refId": "B",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        },
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT value AS SOL_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'SOL'\nORDER BY observed_at DESC\nLIMIT 1;",
+          "queryType": "table",
+          "rawQueryText": "SELECT value AS SOL_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'SOL'\nORDER BY observed_at DESC\nLIMIT 1;",
+          "refId": "C",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        },
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT value AS HYPE_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'HYPE'\nORDER BY observed_at DESC\nLIMIT 1;",
+          "queryType": "table",
+          "rawQueryText": "SELECT value AS HYPE_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'HYPE'\nORDER BY observed_at DESC\nLIMIT 1;",
+          "refId": "D",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Derniers prix crypto USD",
+      "type": "stat"
     }
-  ]
+  ],
+  "preload": false,
+  "refresh": "30s",
+  "schemaVersion": 42,
+  "time": {
+    "from": "2026-07-09T12:48:57.000Z",
+    "to": "2026-07-09T13:07:18.000Z"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "Crypto Macro Overview SQLite",
+  "uid": "crypto-macro-overview-sqlite-v2",
+  "version": 1
 }
