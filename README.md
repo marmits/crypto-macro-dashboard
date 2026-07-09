@@ -12,5 +12,7 @@ http://localhost:9070
 
 ## Installation
 `.env`
+```text
 FRED_API_KEY=
 COINGECKO_API_KEY=
+```
