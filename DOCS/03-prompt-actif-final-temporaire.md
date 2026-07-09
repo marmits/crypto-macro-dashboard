@@ -93,28 +93,27 @@ L’arborescence globale du projet est de ce type :
 
 ```text
 crypto-macro-dashboard/
-├── collector/
-│   ├── config.py
-│   ├── Dockerfile
-│   ├── main.py
-│   └── requirements.txt
-├── data/
-│   ├── .gitkeep
-│   └── macro.db
+├── collector
+│ ├── config.py
+│ ├── Dockerfile
+│ ├── main.py
+│ └── requirements.txt
+├── data
+│ └── macro.db
 ├── docker-compose.yml
-├── DOCS/
-│   ├── 00-prompt-actif.md
-│   ├── 01-prompt-actif.md
-│   └── 02-workflow-edition-dashboard-grafana.md
-├── grafana/
-│   ├── dashboards/
-│   │   └── crypto-macro-overview.json
-│   └── provisioning/
-│       ├── dashboards/
-│       │   └── dashboards.yml
-│       └── datasources/
-│           └── sqlite.yml
-├── .gitignore
+├── DOCS
+│ ├── 00-prompt-actif.md
+│ ├── 01-prompt-actif.md
+│ ├── 02-workflow-grafana-dashboard.md
+│ └── 03-prompt-actif-final-temporaire.md
+├── grafana
+│ ├── dashboards
+│ │ └── crypto-macro-overview.json
+│ └── provisioning
+│     ├── dashboards
+│     │ └── dashboards.yml
+│     └── datasources
+│         └── sqlite.yml
 └── README.md
 ```
 

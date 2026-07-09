@@ -9,3 +9,8 @@ Créer un dashboard local accessible sur :
 ```text
 http://localhost:9070
 ```
+
+## Installation
+`.env`
+FRED_API_KEY=
+COINGECKO_API_KEY=
