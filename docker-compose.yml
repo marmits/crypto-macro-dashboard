@@ -1,0 +1,22 @@
+services:
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: crypto-macro-grafana
+    restart: unless-stopped
+    ports:
+      - "9070:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+
+      # Utile plus tard pour lire directement SQLite depuis Grafana
+      GF_INSTALL_PLUGINS: frser-sqlite-datasource
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./data:/data
+
+volumes:
+  grafana-storage:
