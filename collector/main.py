@@ -297,7 +297,9 @@ def main() -> None:
         create_schema(connection)
 
         collect_fred_series(connection, "FEDFUNDS")
-        collect_coingecko_coin(connection, "bitcoin")
+
+        for coin_id in COINGECKO_COINS.keys():
+            collect_coingecko_coin(connection, coin_id)
 
         connection.commit()
 

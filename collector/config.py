@@ -29,5 +29,23 @@ COINGECKO_COINS = {
         "symbol": "BTC",
         "name": "Bitcoin",
         "unit": "usd",
-    }
+    },
+    "ethereum": {
+        "source": "coingecko",
+        "symbol": "ETH",
+        "name": "Ethereum",
+        "unit": "usd",
+    },
+    "solana": {
+        "source": "coingecko",
+        "symbol": "SOL",
+        "name": "Solana",
+        "unit": "usd",
+    },
+    "hyperliquid": {
+        "source": "coingecko",
+        "symbol": "HYPE",
+        "name": "Hyperliquid",
+        "unit": "usd",
+    },
 }
