@@ -87,6 +87,341 @@ Une migration future vers PostgreSQL, InfluxDB ou Prometheus pourra être envisa
 
 ***
 
+## Objectif fonctionnel final du dashboard
+
+Le but final du projet `crypto-macro-dashboard` n’est pas seulement d’afficher BTC et FEDFUNDS.
+
+L’objectif est de construire progressivement un dashboard local permettant de suivre le contexte macroéconomique et crypto autour des grands axes suivants :
+
+```text
+Fed
+taux
+force du dollar
+rendements US
+pétrole
+inflation
+marché risk-on / risk-off
+````
+
+Le dashboard doit aider à interpréter les signaux de mon bot Freqtrade / Hyperliquid en fournissant un contexte global de marché.
+
+Il ne doit pas déclencher de trades automatiquement au départ.
+
+Il doit uniquement servir de filtre de contexte :
+
+```text
+risk-on / risk-off
+```
+
+***
+
+## Indicateurs cibles à intégrer progressivement
+
+Les indicateurs déjà intégrés ou à intégrer progressivement sont :
+
+### Fed / politique monétaire
+
+```text
+FEDFUNDS
+Fed Funds Rate
+éventuellement taux directeurs / indicateurs de politique monétaire
+```
+
+Statut actuel :
+
+```text
+FEDFUNDS est déjà collecté depuis FRED et affiché dans Grafana.
+```
+
+***
+
+### Taux / rendements US
+
+À intégrer progressivement :
+
+```text
+US 2Y
+US 10Y
+US 30Y
+Yield curve 10Y - 2Y
+```
+
+Objectif :
+
+```text
+Suivre la pression des taux sur les actifs risqués.
+Identifier les phases où les rendements montent fortement.
+Mesurer la pente ou l’inversion de la courbe des taux.
+```
+
+***
+
+### Force du dollar
+
+À intégrer progressivement :
+
+```text
+DXY
+ou équivalent gratuit / proxy dollar
+```
+
+Objectif :
+
+```text
+Suivre la force du dollar.
+Un dollar fort est souvent défavorable aux actifs risqués et aux cryptos.
+```
+
+Source à discuter :
+
+```text
+source gratuite fiable pour DXY ou proxy dollar
+```
+
+***
+
+### Pétrole / énergie
+
+À intégrer progressivement :
+
+```text
+WTI
+Brent
+```
+
+Objectif :
+
+```text
+Suivre les tensions énergie / inflation.
+Une forte hausse du pétrole peut peser sur l’inflation et le contexte risk-on.
+```
+
+Source à discuter :
+
+```text
+FRED si disponible
+autre source gratuite si nécessaire
+```
+
+***
+
+### Inflation
+
+À intégrer progressivement :
+
+```text
+CPI
+Core CPI
+PCE
+Core PCE
+```
+
+Objectif :
+
+```text
+Suivre la tendance inflationniste.
+Comprendre le contexte de politique monétaire de la Fed.
+```
+
+Source pressentie :
+
+```text
+FRED API
+```
+
+***
+
+### Marché risk-on / risk-off
+
+À intégrer progressivement :
+
+```text
+VIX
+S&P 500
+Nasdaq
+BTC
+ETH
+SOL
+HYPE
+```
+
+Objectif :
+
+```text
+Comparer les actifs risqués traditionnels et crypto.
+Détecter un contexte risk-on, neutre ou risk-off.
+```
+
+Statut actuel crypto :
+
+```text
+BTC, ETH, SOL et HYPE sont déjà collectés depuis CoinGecko keyless et affichés dans Grafana.
+```
+
+***
+
+## Dashboard cible à terme
+
+Le dashboard final doit évoluer vers une structure de ce type :
+
+### Ligne 1 — Synthèse
+
+```text
+Score macro
+État risk-on / risk-off
+BTC
+DXY
+US10Y
+VIX
+```
+
+### Ligne 2 — Fed / taux
+
+```text
+Fed Funds Rate
+US2Y
+US10Y
+US30Y
+10Y-2Y spread
+```
+
+### Ligne 3 — Dollar / pétrole
+
+```text
+DXY
+WTI
+Brent
+```
+
+### Ligne 4 — Inflation
+
+```text
+CPI YoY
+Core CPI YoY
+PCE YoY
+Core PCE YoY
+```
+
+### Ligne 5 — Crypto
+
+```text
+BTC
+ETH
+SOL
+HYPE
+```
+
+### Ligne 6 — Interprétation
+
+```text
+Macro favorable
+Macro neutre
+Macro défavorable
+Risk-on
+Risk-off
+Prudence sur les entrées Freqtrade
+```
+
+***
+
+## Score risk-on / risk-off cible
+
+Le projet doit évoluer vers un score simple, lisible et pédagogique.
+
+Exemple de règles futures :
+
+```text
+DXY en hausse forte        => -1
+US10Y en hausse forte      => -1
+US2Y en hausse forte       => -1
+VIX élevé                  => -1
+Pétrole en hausse forte    => -1
+BTC en baisse forte        => -1
+Nasdaq en baisse forte     => -1
+```
+
+Interprétation possible :
+
+```text
+Score >= 0        => contexte respirable
+Score entre -1/-3 => prudence
+Score <= -4       => risk-off marqué
+```
+
+Le score doit rester volontairement simple au départ.
+
+Il ne doit pas chercher à prédire le marché parfaitement.
+
+Son objectif est uniquement d’aider à contextualiser les signaux Freqtrade / Hyperliquid.
+
+````
+
+---
+
+# Petite correction à faire aussi dans la synthèse finale
+
+Dans la section :
+
+```markdown
+## Prochaine étape proposée
+````
+
+Je modifierais la phrase actuelle :
+
+```text
+Étape 10 — Préparer un premier score risk-on / risk-off simple
+```
+
+en une version plus complète :
+
+````markdown
+## Prochaines étapes proposées
+
+Les prochaines étapes doivent maintenant enrichir progressivement le dashboard vers son objectif fonctionnel final :
+
+```text
+Fed
+taux
+force du dollar
+rendements US
+pétrole
+inflation
+marché risk-on / risk-off
+````
+
+Priorité possible :
+
+```text
+Étape 10 — Ajouter les rendements US depuis FRED : US2Y, US10Y, US30Y
+Étape 11 — Ajouter la courbe 10Y - 2Y
+Étape 12 — Ajouter inflation : CPI / Core CPI / PCE / Core PCE
+Étape 13 — Ajouter pétrole : WTI / Brent
+Étape 14 — Ajouter dollar : DXY ou proxy gratuit
+Étape 15 — Ajouter VIX / Nasdaq / S&P 500 si source gratuite fiable
+Étape 16 — Construire un premier score risk-on / risk-off simple
+```
+
+Le score risk-on / risk-off doit venir après quelques indicateurs macro supplémentaires, pour éviter de construire un score basé uniquement sur FEDFUNDS et les cryptos.
+
+````
+
+---
+
+# Ma recommandation
+
+Oui, il faut ajouter cette partie au prompt actif.  
+Sinon, une nouvelle conversation pourrait croire que le projet est maintenant principalement :
+
+```text
+FEDFUNDS + crypto Grafana
+````
+
+alors que ton objectif final est bien plus large :
+
+```text
+macro complète + crypto + contexte risk-on / risk-off
+```
+
 ## Arborescence actuelle
 
 L’arborescence globale du projet est de ce type :
