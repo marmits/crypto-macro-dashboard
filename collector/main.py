@@ -37,6 +37,33 @@ def unix_timestamp_to_iso(timestamp: int | float) -> str:
     return datetime.fromtimestamp(timestamp, tz=timezone.utc).isoformat()
 
 
+def ensure_updated_at_column(connection: sqlite3.Connection) -> None:
+    columns = connection.execute(
+        """
+        PRAGMA table_info(macro_series)
+        """
+    ).fetchall()
+
+    column_names = {column[1] for column in columns}
+
+    if "updated_at" not in column_names:
+        print("Migration SQLite : ajout de la colonne updated_at")
+
+        connection.execute(
+            """
+            ALTER TABLE macro_series
+            ADD COLUMN updated_at TEXT
+            """
+        )
+
+        connection.execute(
+            """
+            UPDATE macro_series
+            SET updated_at = created_at
+            WHERE updated_at IS NULL
+            """
+        )
+
 def create_schema(connection: sqlite3.Connection) -> None:
     connection.execute(
         """
@@ -48,10 +75,13 @@ def create_schema(connection: sqlite3.Connection) -> None:
             value REAL NOT NULL,
             unit TEXT NOT NULL,
             observed_at TEXT NOT NULL,
-            created_at TEXT NOT NULL
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
         )
         """
     )
+
+    ensure_updated_at_column(connection)
 
     connection.execute(
         """
@@ -151,7 +181,7 @@ def upsert_macro_observation(
     unit: str,
     observed_at: str,
 ) -> None:
-    created_at = now_iso()
+    current_time = now_iso()
 
     connection.execute(
         """
@@ -162,15 +192,16 @@ def upsert_macro_observation(
             value,
             unit,
             observed_at,
-            created_at
+            created_at,
+            updated_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(source, symbol, observed_at)
         DO UPDATE SET
             name = excluded.name,
             value = excluded.value,
             unit = excluded.unit,
-            created_at = excluded.created_at
+            updated_at = excluded.updated_at
         """,
         (
             source,
@@ -179,7 +210,8 @@ def upsert_macro_observation(
             value,
             unit,
             observed_at,
-            created_at,
+            current_time,
+            current_time,
         ),
     )
 
@@ -259,7 +291,8 @@ def print_existing_rows(connection: sqlite3.Connection) -> None:
             value,
             unit,
             observed_at,
-            created_at
+            created_at,
+            updated_at
         FROM macro_series
         ORDER BY observed_at DESC, id DESC
         LIMIT 20
@@ -283,6 +316,7 @@ def print_existing_rows(connection: sqlite3.Connection) -> None:
                 "unit": row[5],
                 "observed_at": row[6],
                 "created_at": row[7],
+                "updated_at": row[8],
             }
         )
 
