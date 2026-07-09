@@ -9,13 +9,20 @@ services:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
       GF_USERS_ALLOW_SIGN_UP: "false"
-
-      # Utile plus tard pour lire directement SQLite depuis Grafana
       GF_INSTALL_PLUGINS: frser-sqlite-datasource
     volumes:
       - grafana-storage:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ./data:/data
+
+  collector:
+    build:
+      context: ./collector
+    container_name: crypto-macro-collector
+    environment:
+      DB_PATH: /data/macro.db
+    volumes:
       - ./data:/data
 
 volumes:

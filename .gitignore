@@ -1,1 +1,15 @@
 /.idea/
+
+# SQLite local data
+data/*.db
+data/*.db-shm
+data/*.db-wal
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Docker / env local
+.env
