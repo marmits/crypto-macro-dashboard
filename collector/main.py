@@ -25,6 +25,7 @@ from config import (
 )
 """
 
+
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -63,6 +64,7 @@ def ensure_updated_at_column(connection: sqlite3.Connection) -> None:
             WHERE updated_at IS NULL
             """
         )
+
 
 def create_schema(connection: sqlite3.Connection) -> None:
     connection.execute(
@@ -219,7 +221,10 @@ def upsert_macro_observation(
 def collect_fred_series(connection: sqlite3.Connection, series_id: str) -> None:
     series_config = FRED_SERIES[series_id]
 
-    print(f"Collecte FRED en cours : {series_id}")
+    print(
+        f"Collecte FRED en cours : {series_id} "
+        f"-> {series_config['symbol']}"
+    )
 
     observations = fetch_fred_observations(series_id=series_id, limit=12)
 
@@ -234,7 +239,10 @@ def collect_fred_series(connection: sqlite3.Connection, series_id: str) -> None:
             observed_at=fred_date_to_iso(observation["date"]),
         )
 
-    print(f"{len(observations)} observation(s) FRED traitée(s) pour {series_id}.")
+    print(
+        f"{len(observations)} observation(s) FRED traitée(s) "
+        f"pour {series_id} -> {series_config['symbol']}."
+    )
 
 
 def collect_coingecko_coin(connection: sqlite3.Connection, coin_id: str) -> None:
@@ -330,7 +338,8 @@ def main() -> None:
     try:
         create_schema(connection)
 
-        collect_fred_series(connection, "FEDFUNDS")
+        for series_id in FRED_SERIES.keys():
+            collect_fred_series(connection, series_id)
 
         for coin_id in COINGECKO_COINS.keys():
             collect_coingecko_coin(connection, coin_id)

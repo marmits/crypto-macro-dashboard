@@ -20,7 +20,25 @@ FRED_SERIES = {
         "symbol": "FEDFUNDS",
         "name": "Federal Funds Effective Rate",
         "unit": "percent",
-    }
+    },
+    "DGS2": {
+        "source": "fred",
+        "symbol": "US2Y",
+        "name": "US 2Y Treasury Yield",
+        "unit": "percent",
+    },
+    "DGS10": {
+        "source": "fred",
+        "symbol": "US10Y",
+        "name": "US 10Y Treasury Yield",
+        "unit": "percent",
+    },
+    "DGS30": {
+        "source": "fred",
+        "symbol": "US30Y",
+        "name": "US 30Y Treasury Yield",
+        "unit": "percent",
+    },
 }
 
 COINGECKO_COINS = {
