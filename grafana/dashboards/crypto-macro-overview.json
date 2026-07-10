@@ -22,198 +22,572 @@
   "liveNow": false,
   "panels": [
     {
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 12,
+      "id": 14,
+      "panels": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "decimals": 2,
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 3
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              },
+              "unit": "percent"
+            }
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 1
+          },
+          "id": 1,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "format": "table",
+              "queryText": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
+              "queryType": "raw",
+              "rawQuery": true,
+              "rawQueryText": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
+              "rawSql": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "title": "Dernier FEDFUNDS",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Taux (%)",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "percent"
+            }
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 1
+          },
+          "id": 3,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "format": "time_series",
+              "queryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
+              "queryType": "raw",
+              "rawQuery": true,
+              "rawQueryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
+              "rawSql": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "timeFrom": "5y",
+          "title": "FEDFUNDS — Federal Funds Effective Rate",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percent"
+            }
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 9
+          },
+          "id": 9,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": true
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "queryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('US2Y', 'US10Y', 'US30Y')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'US2Y' THEN m.value END) AS US2Y,\n    MAX(CASE WHEN m.symbol = 'US10Y' THEN m.value END) AS US10Y,\n    MAX(CASE WHEN m.symbol = 'US30Y' THEN m.value END) AS US30Y\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('US2Y', 'US10Y', 'US30Y')",
+              "queryType": "table",
+              "rawQueryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('US2Y', 'US10Y', 'US30Y')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'US2Y' THEN m.value END) AS US2Y,\n    MAX(CASE WHEN m.symbol = 'US10Y' THEN m.value END) AS US10Y,\n    MAX(CASE WHEN m.symbol = 'US30Y' THEN m.value END) AS US30Y\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('US2Y', 'US10Y', 'US30Y')",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "title": "Derniers rendements US",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percent"
+            }
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 9
+          },
+          "id": 8,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "queryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'US2Y' THEN value END) AS US2Y,\n    MAX(CASE WHEN symbol = 'US10Y' THEN value END) AS US10Y,\n    MAX(CASE WHEN symbol = 'US30Y' THEN value END) AS US30Y\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('US2Y', 'US10Y', 'US30Y')\nGROUP BY observed_at\nORDER BY observed_at ASC",
+              "queryType": "table",
+              "rawQueryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'US2Y' THEN value END) AS US2Y,\n    MAX(CASE WHEN symbol = 'US10Y' THEN value END) AS US10Y,\n    MAX(CASE WHEN symbol = 'US30Y' THEN value END) AS US30Y\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('US2Y', 'US10Y', 'US30Y')\nGROUP BY observed_at\nORDER BY observed_at ASC",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "timeFrom": "5y",
+          "title": "US Treasury Yields — FRED",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "text",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line+area"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0
+                  },
+                  {
+                    "color": "green",
+                    "value": 0.5
+                  }
+                ]
+              },
+              "unit": "percent"
+            }
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 16
+          },
+          "id": 10,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "queryText": "SELECT\n    us10y.observed_at AS time,\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at ASC",
+              "queryType": "table",
+              "rawQueryText": "SELECT\n    us10y.observed_at AS time,\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at ASC",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "timeFrom": "5y",
+          "title": "US 10Y - 2Y Yield Spread — FRED",
+          "transparent": true,
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0
+                  },
+                  {
+                    "color": "green",
+                    "value": 0.5
+                  }
+                ]
+              },
+              "unit": "percent"
+            }
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 11,
+            "x": 13,
+            "y": 16
+          },
+          "id": 11,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "queryText": "SELECT\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at DESC\nLIMIT 1\n",
+              "queryType": "table",
+              "rawQueryText": "SELECT\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at DESC\nLIMIT 1\n",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "title": "Dernier spread 10Y-2Y",
+          "type": "stat"
+        }
+      ],
       "title": "Main",
       "type": "row"
     },
     {
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "decimals": 2,
-          "max": 100,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "orange",
-                "value": 3
-              },
-              {
-                "color": "red",
-                "value": 5
-              }
-            ]
-          },
-          "unit": "percent"
-        }
-      },
+      "collapsed": false,
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 1,
+        "w": 24,
         "x": 0,
         "y": 1
       },
-      "id": 1,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "13.0.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "format": "table",
-          "queryText": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
-          "queryType": "raw",
-          "rawQuery": true,
-          "rawQueryText": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
-          "rawSql": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
-          "refId": "A",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        }
-      ],
-      "title": "Dernier FEDFUNDS",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "Taux (%)",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "decimals": 2,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "percent"
-        }
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 1
-      },
-      "id": 3,
-      "options": {
-        "annotations": {
-          "clustering": -1,
-          "multiLane": false
-        },
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "13.0.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "format": "time_series",
-          "queryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
-          "queryType": "raw",
-          "rawQuery": true,
-          "rawQueryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
-          "rawSql": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
-          "refId": "A",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        }
-      ],
-      "timeFrom": "5y",
-      "title": "FEDFUNDS — Federal Funds Effective Rate",
-      "type": "timeseries"
+      "id": 15,
+      "title": "Inflation",
+      "type": "row"
     },
     {
       "datasource": {
@@ -225,6 +599,7 @@
           "color": {
             "mode": "thresholds"
           },
+          "decimals": 2,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -242,12 +617,12 @@
         }
       },
       "gridPos": {
-        "h": 7,
-        "w": 12,
+        "h": 9,
+        "w": 8,
         "x": 0,
-        "y": 9
+        "y": 2
       },
-      "id": 9,
+      "id": 12,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -272,9 +647,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
-          "queryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('US2Y', 'US10Y', 'US30Y')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'US2Y' THEN m.value END) AS US2Y,\n    MAX(CASE WHEN m.symbol = 'US10Y' THEN m.value END) AS US10Y,\n    MAX(CASE WHEN m.symbol = 'US30Y' THEN m.value END) AS US30Y\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('US2Y', 'US10Y', 'US30Y')",
+          "queryText": "WITH monthly_values AS (\n    SELECT\n        symbol,\n        value,\n        date(substr(observed_at, 1, 10)) AS observed_date\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('CPI', 'CORE_CPI', 'PCE', 'CORE_PCE')\n),\nyoy_values AS (\n    SELECT\n        current.symbol,\n        current.observed_date,\n        ((current.value / previous.value) - 1.0) * 100.0 AS yoy_percent\n    FROM monthly_values current\n    JOIN monthly_values previous\n      ON previous.symbol = current.symbol\n     AND previous.observed_date = date(current.observed_date, '-1 year')\n),\nlatest_dates AS (\n    SELECT\n        symbol,\n        MAX(observed_date) AS latest_observed_date\n    FROM yoy_values\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN y.symbol = 'CPI' THEN y.yoy_percent END) AS \"CPI YoY\",\n    MAX(CASE WHEN y.symbol = 'CORE_CPI' THEN y.yoy_percent END) AS \"Core CPI YoY\",\n    MAX(CASE WHEN y.symbol = 'PCE' THEN y.yoy_percent END) AS \"PCE YoY\",\n    MAX(CASE WHEN y.symbol = 'CORE_PCE' THEN y.yoy_percent END) AS \"Core PCE YoY\"\nFROM yoy_values y\nJOIN latest_dates latest\n  ON latest.symbol = y.symbol\n AND latest.latest_observed_date = y.observed_date",
           "queryType": "table",
-          "rawQueryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('US2Y', 'US10Y', 'US30Y')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'US2Y' THEN m.value END) AS US2Y,\n    MAX(CASE WHEN m.symbol = 'US10Y' THEN m.value END) AS US10Y,\n    MAX(CASE WHEN m.symbol = 'US30Y' THEN m.value END) AS US30Y\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('US2Y', 'US10Y', 'US30Y')",
+          "rawQueryText": "WITH monthly_values AS (\n    SELECT\n        symbol,\n        value,\n        date(substr(observed_at, 1, 10)) AS observed_date\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('CPI', 'CORE_CPI', 'PCE', 'CORE_PCE')\n),\nyoy_values AS (\n    SELECT\n        current.symbol,\n        current.observed_date,\n        ((current.value / previous.value) - 1.0) * 100.0 AS yoy_percent\n    FROM monthly_values current\n    JOIN monthly_values previous\n      ON previous.symbol = current.symbol\n     AND previous.observed_date = date(current.observed_date, '-1 year')\n),\nlatest_dates AS (\n    SELECT\n        symbol,\n        MAX(observed_date) AS latest_observed_date\n    FROM yoy_values\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN y.symbol = 'CPI' THEN y.yoy_percent END) AS \"CPI YoY\",\n    MAX(CASE WHEN y.symbol = 'CORE_CPI' THEN y.yoy_percent END) AS \"Core CPI YoY\",\n    MAX(CASE WHEN y.symbol = 'PCE' THEN y.yoy_percent END) AS \"PCE YoY\",\n    MAX(CASE WHEN y.symbol = 'CORE_PCE' THEN y.yoy_percent END) AS \"Core PCE YoY\"\nFROM yoy_values y\nJOIN latest_dates latest\n  ON latest.symbol = y.symbol\n AND latest.latest_observed_date = y.observed_date",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -282,7 +657,7 @@
           ]
         }
       ],
-      "title": "Derniers rendements US",
+      "title": "Dernière inflation YoY",
       "type": "stat"
     },
     {
@@ -294,112 +669,6 @@
         "defaults": {
           "color": {
             "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "percent"
-        }
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 9
-      },
-      "id": 8,
-      "options": {
-        "annotations": {
-          "clustering": -1,
-          "multiLane": false
-        },
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "13.0.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "queryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'US2Y' THEN value END) AS US2Y,\n    MAX(CASE WHEN symbol = 'US10Y' THEN value END) AS US10Y,\n    MAX(CASE WHEN symbol = 'US30Y' THEN value END) AS US30Y\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('US2Y', 'US10Y', 'US30Y')\nGROUP BY observed_at\nORDER BY observed_at ASC",
-          "queryType": "table",
-          "rawQueryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'US2Y' THEN value END) AS US2Y,\n    MAX(CASE WHEN symbol = 'US10Y' THEN value END) AS US10Y,\n    MAX(CASE WHEN symbol = 'US30Y' THEN value END) AS US30Y\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('US2Y', 'US10Y', 'US30Y')\nGROUP BY observed_at\nORDER BY observed_at ASC",
-          "refId": "A",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        }
-      ],
-      "timeFrom": "5y",
-      "title": "US Treasury Yields — FRED",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "text",
-            "mode": "fixed"
           },
           "custom": {
             "axisBorderShow": false,
@@ -435,312 +704,50 @@
               "mode": "line+area"
             }
           },
+          "decimals": 2,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "green",
                 "value": 0
               },
               {
                 "color": "orange",
-                "value": 0
+                "value": 2
               },
               {
-                "color": "green",
-                "value": 0.5
+                "color": "red",
+                "value": 3.5
               }
             ]
           },
           "unit": "percent"
-        }
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 0,
-        "y": 16
-      },
-      "id": 10,
-      "options": {
-        "annotations": {
-          "clustering": -1,
-          "multiLane": false
-        },
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "13.0.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "queryText": "SELECT\n    us10y.observed_at AS time,\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at ASC",
-          "queryType": "table",
-          "rawQueryText": "SELECT\n    us10y.observed_at AS time,\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at ASC",
-          "refId": "A",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        }
-      ],
-      "timeFrom": "5y",
-      "title": "US 10Y - 2Y Yield Spread — FRED",
-      "transparent": true,
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "percentage",
-            "steps": [
-              {
-                "color": "red",
-                "value": 0
-              },
-              {
-                "color": "orange",
-                "value": 0
-              },
-              {
-                "color": "green",
-                "value": 0.5
-              }
-            ]
-          },
-          "unit": "percent"
-        }
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 11,
-        "x": 13,
-        "y": 16
-      },
-      "id": 11,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "13.0.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "queryText": "SELECT\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at DESC\nLIMIT 1\n",
-          "queryType": "table",
-          "rawQueryText": "SELECT\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at DESC\nLIMIT 1\n",
-          "refId": "A",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        }
-      ],
-      "title": "Dernier spread 10Y-2Y",
-      "type": "stat"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 25
-      },
-      "id": 13,
-      "title": "Cryptos",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "Prix USD",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 6,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "always",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "decimals": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "currencyUSD"
-        }
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 0,
-        "y": 26
-      },
-      "id": 4,
-      "options": {
-        "annotations": {
-          "clustering": -1,
-          "multiLane": false
-        },
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "13.0.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "format": "time_series",
-          "queryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS BTC_USD FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at ASC;",
-          "queryType": "raw",
-          "rawQuery": true,
-          "rawQueryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS BTC_USD FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at ASC;",
-          "rawSql": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS BTC_USD FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at ASC;",
-          "refId": "A",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        }
-      ],
-      "timeFrom": "7d",
-      "title": "BTC/USD — CoinGecko",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "currencyUSD"
         }
       },
       "gridPos": {
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 26
+        "y": 2
       },
-      "id": 7,
+      "id": 13,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
         },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "pluginVersion": "13.0.2",
       "targets": [
@@ -749,118 +756,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
-          "queryText": "SELECT value AS BTC_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'BTC'\nORDER BY observed_at DESC\nLIMIT 1;  ",
+          "queryText": "WITH monthly_values AS (\n    SELECT\n        symbol,\n        value,\n        observed_at,\n        date(substr(observed_at, 1, 10)) AS observed_date\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('CPI', 'CORE_CPI', 'PCE', 'CORE_PCE')\n),\nyoy_values AS (\n    SELECT\n        current.symbol,\n        current.observed_at AS time,\n        current.observed_date,\n        ((current.value / previous.value) - 1.0) * 100.0 AS yoy_percent\n    FROM monthly_values current\n    JOIN monthly_values previous\n      ON previous.symbol = current.symbol\n     AND previous.observed_date = date(current.observed_date, '-1 year')\n)\nSELECT\n    time,\n    MAX(CASE WHEN symbol = 'CPI' THEN yoy_percent END) AS \"CPI YoY\",\n    MAX(CASE WHEN symbol = 'CORE_CPI' THEN yoy_percent END) AS \"Core CPI YoY\",\n    MAX(CASE WHEN symbol = 'PCE' THEN yoy_percent END) AS \"PCE YoY\",\n    MAX(CASE WHEN symbol = 'CORE_PCE' THEN yoy_percent END) AS \"Core PCE YoY\"\nFROM yoy_values\nGROUP BY time\nORDER BY time ASC   ",
           "queryType": "table",
-          "rawQueryText": "SELECT value AS BTC_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'BTC'\nORDER BY observed_at DESC\nLIMIT 1;  ",
-          "refId": "A",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        },
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "queryText": "SELECT value AS ETH_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'ETH'\nORDER BY observed_at DESC\nLIMIT 1;",
-          "queryType": "table",
-          "rawQueryText": "SELECT value AS ETH_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'ETH'\nORDER BY observed_at DESC\nLIMIT 1;",
-          "refId": "B",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        },
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "queryText": "SELECT value AS SOL_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'SOL'\nORDER BY observed_at DESC\nLIMIT 1;",
-          "queryType": "table",
-          "rawQueryText": "SELECT value AS SOL_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'SOL'\nORDER BY observed_at DESC\nLIMIT 1;",
-          "refId": "C",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        },
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "queryText": "SELECT value AS HYPE_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'HYPE'\nORDER BY observed_at DESC\nLIMIT 1;",
-          "queryType": "table",
-          "rawQueryText": "SELECT value AS HYPE_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'HYPE'\nORDER BY observed_at DESC\nLIMIT 1;",
-          "refId": "D",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        }
-      ],
-      "title": "Derniers prix crypto USD",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "decimals": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "currencyUSD"
-        }
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 16,
-        "y": 26
-      },
-      "id": 2,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "13.0.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "format": "table",
-          "queryText": "SELECT value FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at DESC LIMIT 1;",
-          "queryType": "raw",
-          "rawQuery": true,
-          "rawQueryText": "SELECT value FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at DESC LIMIT 1;",
-          "rawSql": "SELECT value FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at DESC LIMIT 1;",
+          "rawQueryText": "WITH monthly_values AS (\n    SELECT\n        symbol,\n        value,\n        observed_at,\n        date(substr(observed_at, 1, 10)) AS observed_date\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('CPI', 'CORE_CPI', 'PCE', 'CORE_PCE')\n),\nyoy_values AS (\n    SELECT\n        current.symbol,\n        current.observed_at AS time,\n        current.observed_date,\n        ((current.value / previous.value) - 1.0) * 100.0 AS yoy_percent\n    FROM monthly_values current\n    JOIN monthly_values previous\n      ON previous.symbol = current.symbol\n     AND previous.observed_date = date(current.observed_date, '-1 year')\n)\nSELECT\n    time,\n    MAX(CASE WHEN symbol = 'CPI' THEN yoy_percent END) AS \"CPI YoY\",\n    MAX(CASE WHEN symbol = 'CORE_CPI' THEN yoy_percent END) AS \"Core CPI YoY\",\n    MAX(CASE WHEN symbol = 'PCE' THEN yoy_percent END) AS \"PCE YoY\",\n    MAX(CASE WHEN symbol = 'CORE_PCE' THEN yoy_percent END) AS \"Core PCE YoY\"\nFROM yoy_values\nGROUP BY time\nORDER BY time ASC   ",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -868,8 +766,9 @@
           ]
         }
       ],
-      "title": "Dernier BTC/USD",
-      "type": "stat"
+      "timeFrom": "10y",
+      "title": "Inflation YoY — FRED",
+      "type": "timeseries"
     },
     {
       "collapsed": true,
@@ -877,9 +776,307 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 35
+        "y": 11
       },
-      "id": 14,
+      "id": 16,
+      "panels": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Prix USD",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 6,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "always",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "currencyUSD"
+            }
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 0,
+            "y": 12
+          },
+          "id": 4,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "format": "time_series",
+              "queryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS BTC_USD FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at ASC;",
+              "queryType": "raw",
+              "rawQuery": true,
+              "rawQueryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS BTC_USD FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at ASC;",
+              "rawSql": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS BTC_USD FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at ASC;",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "timeFrom": "7d",
+          "title": "BTC/USD — CoinGecko",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "currencyUSD"
+            }
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 8,
+            "y": 12
+          },
+          "id": 7,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "queryText": "SELECT value AS BTC_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'BTC'\nORDER BY observed_at DESC\nLIMIT 1;  ",
+              "queryType": "table",
+              "rawQueryText": "SELECT value AS BTC_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'BTC'\nORDER BY observed_at DESC\nLIMIT 1;  ",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            },
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "queryText": "SELECT value AS ETH_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'ETH'\nORDER BY observed_at DESC\nLIMIT 1;",
+              "queryType": "table",
+              "rawQueryText": "SELECT value AS ETH_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'ETH'\nORDER BY observed_at DESC\nLIMIT 1;",
+              "refId": "B",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            },
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "queryText": "SELECT value AS SOL_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'SOL'\nORDER BY observed_at DESC\nLIMIT 1;",
+              "queryType": "table",
+              "rawQueryText": "SELECT value AS SOL_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'SOL'\nORDER BY observed_at DESC\nLIMIT 1;",
+              "refId": "C",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            },
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "queryText": "SELECT value AS HYPE_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'HYPE'\nORDER BY observed_at DESC\nLIMIT 1;",
+              "queryType": "table",
+              "rawQueryText": "SELECT value AS HYPE_USD\nFROM macro_series\nWHERE source = 'coingecko'\n  AND symbol = 'HYPE'\nORDER BY observed_at DESC\nLIMIT 1;",
+              "refId": "D",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "title": "Derniers prix crypto USD",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "currencyUSD"
+            }
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 16,
+            "y": 12
+          },
+          "id": 2,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "format": "table",
+              "queryText": "SELECT value FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at DESC LIMIT 1;",
+              "queryType": "raw",
+              "rawQuery": true,
+              "rawQueryText": "SELECT value FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at DESC LIMIT 1;",
+              "rawSql": "SELECT value FROM macro_series WHERE source = 'coingecko' AND symbol = 'BTC' ORDER BY observed_at DESC LIMIT 1;",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "title": "Dernier BTC/USD",
+          "type": "stat"
+        }
+      ],
+      "title": "Cryptos",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 17,
       "panels": [
         {
           "datasource": {
@@ -917,7 +1114,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 36
+            "y": 13
           },
           "id": 5,
           "options": {
@@ -983,7 +1180,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 36
+            "y": 13
           },
           "id": 6,
           "options": {
