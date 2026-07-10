@@ -92,6 +92,27 @@ FRED_SERIES = {
         "unit": "index",
         "limit": 1500,
     },
+    "VIXCLS": {
+        "source": "fred",
+        "symbol": "VIX",
+        "name": "CBOE Volatility Index",
+        "unit": "index",
+        "limit": 1500,
+    },
+    "SP500": {
+        "source": "fred",
+        "symbol": "SP500",
+        "name": "S&P 500",
+        "unit": "index",
+        "limit": 1500,
+    },
+    "NASDAQCOM": {
+        "source": "fred",
+        "symbol": "NASDAQ",
+        "name": "NASDAQ Composite",
+        "unit": "index",
+        "limit": 1500,
+    },
 }
 
 COINGECKO_COINS = {
