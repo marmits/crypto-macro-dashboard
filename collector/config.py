@@ -43,6 +43,34 @@ FRED_SERIES = {
         "unit": "percent",
         "limit": 1500,
     },
+    "CPIAUCSL": {
+        "source": "fred",
+        "symbol": "CPI",
+        "name": "Consumer Price Index",
+        "unit": "index",
+        "limit": 240,
+    },
+    "CPILFESL": {
+        "source": "fred",
+        "symbol": "CORE_CPI",
+        "name": "Core Consumer Price Index",
+        "unit": "index",
+        "limit": 240,
+    },
+    "PCEPI": {
+        "source": "fred",
+        "symbol": "PCE",
+        "name": "Personal Consumption Expenditures Price Index",
+        "unit": "index",
+        "limit": 240,
+    },
+    "PCEPILFE": {
+        "source": "fred",
+        "symbol": "CORE_PCE",
+        "name": "Core Personal Consumption Expenditures Price Index",
+        "unit": "index",
+        "limit": 240,
+    },
 }
 
 COINGECKO_COINS = {
