@@ -350,15 +350,8 @@
       },
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "footer": {
-              "reducers": []
-            },
-            "inspect": false
+          "color": {
+            "mode": "thresholds"
           },
           "thresholds": {
             "mode": "absolute",
@@ -372,19 +365,33 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "percent"
         }
       },
       "gridPos": {
-        "h": 9,
+        "h": 7,
         "w": 12,
         "x": 12,
         "y": 9
       },
-      "id": 5,
+      "id": 9,
       "options": {
-        "cellHeight": "sm",
-        "showHeader": true
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
       "pluginVersion": "13.0.2",
       "targets": [
@@ -393,12 +400,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
-          "format": "table",
-          "queryText": "SELECT\n  id,\n  symbol,\n  name,\n  value,\n  unit,\n  observed_at,\n  created_at\nFROM macro_series\nWHERE source = 'coingecko'\nORDER BY observed_at DESC, symbol ASC\nLIMIT 50; ",
-          "queryType": "raw",
-          "rawQuery": true,
-          "rawQueryText": "SELECT\n  id,\n  symbol,\n  name,\n  value,\n  unit,\n  observed_at,\n  created_at\nFROM macro_series\nWHERE source = 'coingecko'\nORDER BY observed_at DESC, symbol ASC\nLIMIT 50; ",
-          "rawSql": "SELECT id, source, symbol, name, value, unit, observed_at, created_at FROM macro_series WHERE source = 'coingecko' ORDER BY observed_at DESC, id DESC LIMIT 50;",
+          "queryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('US2Y', 'US10Y', 'US30Y')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'US2Y' THEN m.value END) AS US2Y,\n    MAX(CASE WHEN m.symbol = 'US10Y' THEN m.value END) AS US10Y,\n    MAX(CASE WHEN m.symbol = 'US30Y' THEN m.value END) AS US30Y\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('US2Y', 'US10Y', 'US30Y')",
+          "queryType": "table",
+          "rawQueryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('US2Y', 'US10Y', 'US30Y')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'US2Y' THEN m.value END) AS US2Y,\n    MAX(CASE WHEN m.symbol = 'US10Y' THEN m.value END) AS US10Y,\n    MAX(CASE WHEN m.symbol = 'US30Y' THEN m.value END) AS US30Y\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('US2Y', 'US10Y', 'US30Y')",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -406,8 +410,113 @@
           ]
         }
       ],
-      "title": "Données crypto",
-      "type": "table"
+      "title": "Derniers rendements US",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 8,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'US2Y' THEN value END) AS US2Y,\n    MAX(CASE WHEN symbol = 'US10Y' THEN value END) AS US10Y,\n    MAX(CASE WHEN symbol = 'US30Y' THEN value END) AS US30Y\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('US2Y', 'US10Y', 'US30Y')\nGROUP BY observed_at\nORDER BY observed_at ASC",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'US2Y' THEN value END) AS US2Y,\n    MAX(CASE WHEN symbol = 'US10Y' THEN value END) AS US10Y,\n    MAX(CASE WHEN symbol = 'US30Y' THEN value END) AS US30Y\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('US2Y', 'US10Y', 'US30Y')\nGROUP BY observed_at\nORDER BY observed_at ASC",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "5y",
+      "title": "US Treasury Yields — FRED",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -587,9 +696,75 @@
       },
       "gridPos": {
         "h": 9,
-        "w": 24,
+        "w": 12,
         "x": 0,
         "y": 23
+      },
+      "id": 5,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "format": "table",
+          "queryText": "SELECT\n  id,\n  symbol,\n  name,\n  value,\n  unit,\n  observed_at,\n  created_at\nFROM macro_series\nWHERE source = 'coingecko'\nORDER BY observed_at DESC, symbol ASC\nLIMIT 50; ",
+          "queryType": "raw",
+          "rawQuery": true,
+          "rawQueryText": "SELECT\n  id,\n  symbol,\n  name,\n  value,\n  unit,\n  observed_at,\n  created_at\nFROM macro_series\nWHERE source = 'coingecko'\nORDER BY observed_at DESC, symbol ASC\nLIMIT 50; ",
+          "rawSql": "SELECT id, source, symbol, name, value, unit, observed_at, created_at FROM macro_series WHERE source = 'coingecko' ORDER BY observed_at DESC, id DESC LIMIT 50;",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Données crypto",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 32
       },
       "id": 6,
       "options": {

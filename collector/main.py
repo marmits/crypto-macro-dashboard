@@ -220,13 +220,15 @@ def upsert_macro_observation(
 
 def collect_fred_series(connection: sqlite3.Connection, series_id: str) -> None:
     series_config = FRED_SERIES[series_id]
+    limit = series_config.get("limit", 12)
 
     print(
         f"Collecte FRED en cours : {series_id} "
-        f"-> {series_config['symbol']}"
+        f"-> {series_config['symbol']} "
+        f"limit={limit}"
     )
 
-    observations = fetch_fred_observations(series_id=series_id, limit=12)
+    observations = fetch_fred_observations(series_id=series_id, limit=limit)
 
     for observation in observations:
         upsert_macro_observation(
