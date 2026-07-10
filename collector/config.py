@@ -85,6 +85,13 @@ FRED_SERIES = {
         "unit": "usd_per_barrel",
         "limit": 1500,
     },
+    "DTWEXBGS": {
+        "source": "fred",
+        "symbol": "USD_BROAD",
+        "name": "Nominal Broad U.S. Dollar Index",
+        "unit": "index",
+        "limit": 1500,
+    },
 }
 
 COINGECKO_COINS = {
