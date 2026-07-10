@@ -29,7 +29,7 @@
         "x": 0,
         "y": 0
       },
-      "id": 16,
+      "id": 18,
       "panels": [
         {
           "datasource": {
@@ -578,14 +578,205 @@
       "type": "row"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 1
       },
+      "id": 19,
+      "title": "Dollar",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 2
+      },
+      "id": 16,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at DESC\nLIMIT 1",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at DESC\nLIMIT 1",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Dernier dollar broad",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 115
+              },
+              {
+                "color": "red",
+                "value": 122
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 2
+      },
       "id": 17,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    observed_at AS time,\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at ASC",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at ASC",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "5y",
+      "title": "U.S. Dollar Index — FRED",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "id": 20,
       "panels": [
         {
           "datasource": {
@@ -618,7 +809,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 2
+            "y": 12
           },
           "id": 12,
           "options": {
@@ -727,7 +918,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 2
+            "y": 12
           },
           "id": 13,
           "options": {
@@ -773,199 +964,6 @@
       "type": "row"
     },
     {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 2
-      },
-      "id": 18,
-      "title": "Energy",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 2,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "currencyUSD"
-        }
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 0,
-        "y": 3
-      },
-      "id": 14,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "13.0.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "queryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('WTI', 'BRENT')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'WTI' THEN m.value END) AS WTI,\n    MAX(CASE WHEN m.symbol = 'BRENT' THEN m.value END) AS BRENT\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('WTI', 'BRENT')",
-          "queryType": "table",
-          "rawQueryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('WTI', 'BRENT')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'WTI' THEN m.value END) AS WTI,\n    MAX(CASE WHEN m.symbol = 'BRENT' THEN m.value END) AS BRENT\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('WTI', 'BRENT')",
-          "refId": "A",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        }
-      ],
-      "title": "Derniers prix pétrole",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "line"
-            }
-          },
-          "decimals": 2,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "orange",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 90
-              }
-            ]
-          },
-          "unit": "currencyUSD"
-        }
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 3
-      },
-      "id": 15,
-      "options": {
-        "annotations": {
-          "clustering": -1,
-          "multiLane": false
-        },
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "13.0.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "queryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'WTI' THEN value END) AS WTI,\n    MAX(CASE WHEN symbol = 'BRENT' THEN value END) AS BRENT\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('WTI', 'BRENT')\nGROUP BY observed_at\nORDER BY observed_at ASC",
-          "queryType": "table",
-          "rawQueryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'WTI' THEN value END) AS WTI,\n    MAX(CASE WHEN symbol = 'BRENT' THEN value END) AS BRENT\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('WTI', 'BRENT')\nGROUP BY observed_at\nORDER BY observed_at ASC",
-          "refId": "A",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        }
-      ],
-      "timeFrom": "1y",
-      "title": "Oil Prices — FRED",
-      "type": "timeseries"
-    },
-    {
       "collapsed": true,
       "gridPos": {
         "h": 1,
@@ -973,7 +971,202 @@
         "x": 0,
         "y": 12
       },
-      "id": 19,
+      "id": 21,
+      "panels": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "currencyUSD"
+            }
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 13
+          },
+          "id": 14,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "queryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('WTI', 'BRENT')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'WTI' THEN m.value END) AS WTI,\n    MAX(CASE WHEN m.symbol = 'BRENT' THEN m.value END) AS BRENT\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('WTI', 'BRENT')",
+              "queryType": "table",
+              "rawQueryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('WTI', 'BRENT')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'WTI' THEN m.value END) AS WTI,\n    MAX(CASE WHEN m.symbol = 'BRENT' THEN m.value END) AS BRENT\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('WTI', 'BRENT')",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "title": "Derniers prix pétrole",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line"
+                }
+              },
+              "decimals": 2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "currencyUSD"
+            }
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 13
+          },
+          "id": 15,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "queryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'WTI' THEN value END) AS WTI,\n    MAX(CASE WHEN symbol = 'BRENT' THEN value END) AS BRENT\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('WTI', 'BRENT')\nGROUP BY observed_at\nORDER BY observed_at ASC",
+              "queryType": "table",
+              "rawQueryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'WTI' THEN value END) AS WTI,\n    MAX(CASE WHEN symbol = 'BRENT' THEN value END) AS BRENT\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('WTI', 'BRENT')\nGROUP BY observed_at\nORDER BY observed_at ASC",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "timeFrom": "1y",
+          "title": "Oil Prices — FRED",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Energy",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "id": 22,
       "panels": [
         {
           "datasource": {
@@ -1036,7 +1229,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 13
+            "y": 14
           },
           "id": 4,
           "options": {
@@ -1110,7 +1303,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 13
+            "y": 14
           },
           "id": 7,
           "options": {
@@ -1216,7 +1409,7 @@
             "h": 9,
             "w": 8,
             "x": 16,
-            "y": 13
+            "y": 14
           },
           "id": 2,
           "options": {
@@ -1269,9 +1462,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 14
       },
-      "id": 20,
+      "id": 23,
       "panels": [
         {
           "datasource": {
@@ -1309,7 +1502,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 14
+            "y": 15
           },
           "id": 5,
           "options": {
@@ -1375,7 +1568,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 14
+            "y": 15
           },
           "id": 6,
           "options": {
