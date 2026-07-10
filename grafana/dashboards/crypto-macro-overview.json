@@ -29,7 +29,7 @@
         "x": 0,
         "y": 0
       },
-      "id": 14,
+      "id": 16,
       "panels": [
         {
           "datasource": {
@@ -578,15 +578,210 @@
       "type": "row"
     },
     {
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 1
       },
-      "id": 15,
+      "id": 17,
+      "panels": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percent"
+            }
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 0,
+            "y": 2
+          },
+          "id": 12,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": true
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "queryText": "WITH monthly_values AS (\n    SELECT\n        symbol,\n        value,\n        date(substr(observed_at, 1, 10)) AS observed_date\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('CPI', 'CORE_CPI', 'PCE', 'CORE_PCE')\n),\nyoy_values AS (\n    SELECT\n        current.symbol,\n        current.observed_date,\n        ((current.value / previous.value) - 1.0) * 100.0 AS yoy_percent\n    FROM monthly_values current\n    JOIN monthly_values previous\n      ON previous.symbol = current.symbol\n     AND previous.observed_date = date(current.observed_date, '-1 year')\n),\nlatest_dates AS (\n    SELECT\n        symbol,\n        MAX(observed_date) AS latest_observed_date\n    FROM yoy_values\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN y.symbol = 'CPI' THEN y.yoy_percent END) AS \"CPI YoY\",\n    MAX(CASE WHEN y.symbol = 'CORE_CPI' THEN y.yoy_percent END) AS \"Core CPI YoY\",\n    MAX(CASE WHEN y.symbol = 'PCE' THEN y.yoy_percent END) AS \"PCE YoY\",\n    MAX(CASE WHEN y.symbol = 'CORE_PCE' THEN y.yoy_percent END) AS \"Core PCE YoY\"\nFROM yoy_values y\nJOIN latest_dates latest\n  ON latest.symbol = y.symbol\n AND latest.latest_observed_date = y.observed_date",
+              "queryType": "table",
+              "rawQueryText": "WITH monthly_values AS (\n    SELECT\n        symbol,\n        value,\n        date(substr(observed_at, 1, 10)) AS observed_date\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('CPI', 'CORE_CPI', 'PCE', 'CORE_PCE')\n),\nyoy_values AS (\n    SELECT\n        current.symbol,\n        current.observed_date,\n        ((current.value / previous.value) - 1.0) * 100.0 AS yoy_percent\n    FROM monthly_values current\n    JOIN monthly_values previous\n      ON previous.symbol = current.symbol\n     AND previous.observed_date = date(current.observed_date, '-1 year')\n),\nlatest_dates AS (\n    SELECT\n        symbol,\n        MAX(observed_date) AS latest_observed_date\n    FROM yoy_values\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN y.symbol = 'CPI' THEN y.yoy_percent END) AS \"CPI YoY\",\n    MAX(CASE WHEN y.symbol = 'CORE_CPI' THEN y.yoy_percent END) AS \"Core CPI YoY\",\n    MAX(CASE WHEN y.symbol = 'PCE' THEN y.yoy_percent END) AS \"PCE YoY\",\n    MAX(CASE WHEN y.symbol = 'CORE_PCE' THEN y.yoy_percent END) AS \"Core PCE YoY\"\nFROM yoy_values y\nJOIN latest_dates latest\n  ON latest.symbol = y.symbol\n AND latest.latest_observed_date = y.observed_date",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "title": "Dernière inflation YoY",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line+area"
+                }
+              },
+              "decimals": 2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 2
+                  },
+                  {
+                    "color": "red",
+                    "value": 3.5
+                  }
+                ]
+              },
+              "unit": "percent"
+            }
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 8,
+            "y": 2
+          },
+          "id": 13,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "queryText": "WITH monthly_values AS (\n    SELECT\n        symbol,\n        value,\n        observed_at,\n        date(substr(observed_at, 1, 10)) AS observed_date\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('CPI', 'CORE_CPI', 'PCE', 'CORE_PCE')\n),\nyoy_values AS (\n    SELECT\n        current.symbol,\n        current.observed_at AS time,\n        current.observed_date,\n        ((current.value / previous.value) - 1.0) * 100.0 AS yoy_percent\n    FROM monthly_values current\n    JOIN monthly_values previous\n      ON previous.symbol = current.symbol\n     AND previous.observed_date = date(current.observed_date, '-1 year')\n)\nSELECT\n    time,\n    MAX(CASE WHEN symbol = 'CPI' THEN yoy_percent END) AS \"CPI YoY\",\n    MAX(CASE WHEN symbol = 'CORE_CPI' THEN yoy_percent END) AS \"Core CPI YoY\",\n    MAX(CASE WHEN symbol = 'PCE' THEN yoy_percent END) AS \"PCE YoY\",\n    MAX(CASE WHEN symbol = 'CORE_PCE' THEN yoy_percent END) AS \"Core PCE YoY\"\nFROM yoy_values\nGROUP BY time\nORDER BY time ASC   ",
+              "queryType": "table",
+              "rawQueryText": "WITH monthly_values AS (\n    SELECT\n        symbol,\n        value,\n        observed_at,\n        date(substr(observed_at, 1, 10)) AS observed_date\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('CPI', 'CORE_CPI', 'PCE', 'CORE_PCE')\n),\nyoy_values AS (\n    SELECT\n        current.symbol,\n        current.observed_at AS time,\n        current.observed_date,\n        ((current.value / previous.value) - 1.0) * 100.0 AS yoy_percent\n    FROM monthly_values current\n    JOIN monthly_values previous\n      ON previous.symbol = current.symbol\n     AND previous.observed_date = date(current.observed_date, '-1 year')\n)\nSELECT\n    time,\n    MAX(CASE WHEN symbol = 'CPI' THEN yoy_percent END) AS \"CPI YoY\",\n    MAX(CASE WHEN symbol = 'CORE_CPI' THEN yoy_percent END) AS \"Core CPI YoY\",\n    MAX(CASE WHEN symbol = 'PCE' THEN yoy_percent END) AS \"PCE YoY\",\n    MAX(CASE WHEN symbol = 'CORE_PCE' THEN yoy_percent END) AS \"Core PCE YoY\"\nFROM yoy_values\nGROUP BY time\nORDER BY time ASC   ",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "timeFrom": "10y",
+          "title": "Inflation YoY — FRED",
+          "type": "timeseries"
+        }
+      ],
       "title": "Inflation",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "id": 18,
+      "title": "Energy",
       "type": "row"
     },
     {
@@ -613,16 +808,16 @@
               }
             ]
           },
-          "unit": "percent"
+          "unit": "currencyUSD"
         }
       },
       "gridPos": {
         "h": 9,
-        "w": 8,
+        "w": 12,
         "x": 0,
-        "y": 2
+        "y": 3
       },
-      "id": 12,
+      "id": 14,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -634,7 +829,7 @@
             "lastNotNull"
           ],
           "fields": "",
-          "values": true
+          "values": false
         },
         "showPercentChange": false,
         "textMode": "auto",
@@ -647,9 +842,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
-          "queryText": "WITH monthly_values AS (\n    SELECT\n        symbol,\n        value,\n        date(substr(observed_at, 1, 10)) AS observed_date\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('CPI', 'CORE_CPI', 'PCE', 'CORE_PCE')\n),\nyoy_values AS (\n    SELECT\n        current.symbol,\n        current.observed_date,\n        ((current.value / previous.value) - 1.0) * 100.0 AS yoy_percent\n    FROM monthly_values current\n    JOIN monthly_values previous\n      ON previous.symbol = current.symbol\n     AND previous.observed_date = date(current.observed_date, '-1 year')\n),\nlatest_dates AS (\n    SELECT\n        symbol,\n        MAX(observed_date) AS latest_observed_date\n    FROM yoy_values\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN y.symbol = 'CPI' THEN y.yoy_percent END) AS \"CPI YoY\",\n    MAX(CASE WHEN y.symbol = 'CORE_CPI' THEN y.yoy_percent END) AS \"Core CPI YoY\",\n    MAX(CASE WHEN y.symbol = 'PCE' THEN y.yoy_percent END) AS \"PCE YoY\",\n    MAX(CASE WHEN y.symbol = 'CORE_PCE' THEN y.yoy_percent END) AS \"Core PCE YoY\"\nFROM yoy_values y\nJOIN latest_dates latest\n  ON latest.symbol = y.symbol\n AND latest.latest_observed_date = y.observed_date",
+          "queryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('WTI', 'BRENT')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'WTI' THEN m.value END) AS WTI,\n    MAX(CASE WHEN m.symbol = 'BRENT' THEN m.value END) AS BRENT\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('WTI', 'BRENT')",
           "queryType": "table",
-          "rawQueryText": "WITH monthly_values AS (\n    SELECT\n        symbol,\n        value,\n        date(substr(observed_at, 1, 10)) AS observed_date\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('CPI', 'CORE_CPI', 'PCE', 'CORE_PCE')\n),\nyoy_values AS (\n    SELECT\n        current.symbol,\n        current.observed_date,\n        ((current.value / previous.value) - 1.0) * 100.0 AS yoy_percent\n    FROM monthly_values current\n    JOIN monthly_values previous\n      ON previous.symbol = current.symbol\n     AND previous.observed_date = date(current.observed_date, '-1 year')\n),\nlatest_dates AS (\n    SELECT\n        symbol,\n        MAX(observed_date) AS latest_observed_date\n    FROM yoy_values\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN y.symbol = 'CPI' THEN y.yoy_percent END) AS \"CPI YoY\",\n    MAX(CASE WHEN y.symbol = 'CORE_CPI' THEN y.yoy_percent END) AS \"Core CPI YoY\",\n    MAX(CASE WHEN y.symbol = 'PCE' THEN y.yoy_percent END) AS \"PCE YoY\",\n    MAX(CASE WHEN y.symbol = 'CORE_PCE' THEN y.yoy_percent END) AS \"Core PCE YoY\"\nFROM yoy_values y\nJOIN latest_dates latest\n  ON latest.symbol = y.symbol\n AND latest.latest_observed_date = y.observed_date",
+          "rawQueryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('WTI', 'BRENT')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'WTI' THEN m.value END) AS WTI,\n    MAX(CASE WHEN m.symbol = 'BRENT' THEN m.value END) AS BRENT\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('WTI', 'BRENT')",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -657,7 +852,7 @@
           ]
         }
       ],
-      "title": "Dernière inflation YoY",
+      "title": "Derniers prix pétrole",
       "type": "stat"
     },
     {
@@ -701,7 +896,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "line+area"
+              "mode": "line"
             }
           },
           "decimals": 2,
@@ -714,24 +909,24 @@
               },
               {
                 "color": "orange",
-                "value": 2
+                "value": 70
               },
               {
                 "color": "red",
-                "value": 3.5
+                "value": 90
               }
             ]
           },
-          "unit": "percent"
+          "unit": "currencyUSD"
         }
       },
       "gridPos": {
         "h": 9,
-        "w": 8,
-        "x": 8,
-        "y": 2
+        "w": 12,
+        "x": 12,
+        "y": 3
       },
-      "id": 13,
+      "id": 15,
       "options": {
         "annotations": {
           "clustering": -1,
@@ -756,9 +951,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
-          "queryText": "WITH monthly_values AS (\n    SELECT\n        symbol,\n        value,\n        observed_at,\n        date(substr(observed_at, 1, 10)) AS observed_date\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('CPI', 'CORE_CPI', 'PCE', 'CORE_PCE')\n),\nyoy_values AS (\n    SELECT\n        current.symbol,\n        current.observed_at AS time,\n        current.observed_date,\n        ((current.value / previous.value) - 1.0) * 100.0 AS yoy_percent\n    FROM monthly_values current\n    JOIN monthly_values previous\n      ON previous.symbol = current.symbol\n     AND previous.observed_date = date(current.observed_date, '-1 year')\n)\nSELECT\n    time,\n    MAX(CASE WHEN symbol = 'CPI' THEN yoy_percent END) AS \"CPI YoY\",\n    MAX(CASE WHEN symbol = 'CORE_CPI' THEN yoy_percent END) AS \"Core CPI YoY\",\n    MAX(CASE WHEN symbol = 'PCE' THEN yoy_percent END) AS \"PCE YoY\",\n    MAX(CASE WHEN symbol = 'CORE_PCE' THEN yoy_percent END) AS \"Core PCE YoY\"\nFROM yoy_values\nGROUP BY time\nORDER BY time ASC   ",
+          "queryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'WTI' THEN value END) AS WTI,\n    MAX(CASE WHEN symbol = 'BRENT' THEN value END) AS BRENT\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('WTI', 'BRENT')\nGROUP BY observed_at\nORDER BY observed_at ASC",
           "queryType": "table",
-          "rawQueryText": "WITH monthly_values AS (\n    SELECT\n        symbol,\n        value,\n        observed_at,\n        date(substr(observed_at, 1, 10)) AS observed_date\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('CPI', 'CORE_CPI', 'PCE', 'CORE_PCE')\n),\nyoy_values AS (\n    SELECT\n        current.symbol,\n        current.observed_at AS time,\n        current.observed_date,\n        ((current.value / previous.value) - 1.0) * 100.0 AS yoy_percent\n    FROM monthly_values current\n    JOIN monthly_values previous\n      ON previous.symbol = current.symbol\n     AND previous.observed_date = date(current.observed_date, '-1 year')\n)\nSELECT\n    time,\n    MAX(CASE WHEN symbol = 'CPI' THEN yoy_percent END) AS \"CPI YoY\",\n    MAX(CASE WHEN symbol = 'CORE_CPI' THEN yoy_percent END) AS \"Core CPI YoY\",\n    MAX(CASE WHEN symbol = 'PCE' THEN yoy_percent END) AS \"PCE YoY\",\n    MAX(CASE WHEN symbol = 'CORE_PCE' THEN yoy_percent END) AS \"Core PCE YoY\"\nFROM yoy_values\nGROUP BY time\nORDER BY time ASC   ",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'WTI' THEN value END) AS WTI,\n    MAX(CASE WHEN symbol = 'BRENT' THEN value END) AS BRENT\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('WTI', 'BRENT')\nGROUP BY observed_at\nORDER BY observed_at ASC",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -766,8 +961,8 @@
           ]
         }
       ],
-      "timeFrom": "10y",
-      "title": "Inflation YoY — FRED",
+      "timeFrom": "1y",
+      "title": "Oil Prices — FRED",
       "type": "timeseries"
     },
     {
@@ -776,9 +971,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 12
       },
-      "id": 16,
+      "id": 19,
       "panels": [
         {
           "datasource": {
@@ -841,7 +1036,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 12
+            "y": 13
           },
           "id": 4,
           "options": {
@@ -915,7 +1110,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 12
+            "y": 13
           },
           "id": 7,
           "options": {
@@ -1021,7 +1216,7 @@
             "h": 9,
             "w": 8,
             "x": 16,
-            "y": 12
+            "y": 13
           },
           "id": 2,
           "options": {
@@ -1074,9 +1269,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 13
       },
-      "id": 17,
+      "id": 20,
       "panels": [
         {
           "datasource": {
@@ -1114,7 +1309,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 13
+            "y": 14
           },
           "id": 5,
           "options": {
@@ -1180,7 +1375,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 13
+            "y": 14
           },
           "id": 6,
           "options": {
