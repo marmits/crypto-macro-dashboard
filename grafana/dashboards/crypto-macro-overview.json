@@ -29,7 +29,7 @@
         "x": 0,
         "y": 0
       },
-      "id": 18,
+      "id": 21,
       "panels": [
         {
           "datasource": {
@@ -578,195 +578,197 @@
       "type": "row"
     },
     {
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 1
       },
-      "id": 19,
-      "title": "Dollar",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 2,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        }
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 0,
-        "y": 2
-      },
-      "id": 16,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": true
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "13.0.2",
-      "targets": [
+      "id": 22,
+      "panels": [
         {
           "datasource": {
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
-          "queryText": "SELECT\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at DESC\nLIMIT 1",
-          "queryType": "table",
-          "rawQueryText": "SELECT\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at DESC\nLIMIT 1",
-          "refId": "A",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
-        }
-      ],
-      "title": "Dernier dollar broad",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "frser-sqlite-datasource",
-        "uid": "macro-sqlite"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "line"
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
             }
           },
-          "decimals": 2,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 2
+          },
+          "id": 16,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": true
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
               },
-              {
-                "color": "orange",
-                "value": 115
-              },
-              {
-                "color": "red",
-                "value": 122
-              }
-            ]
-          }
-        }
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 2
-      },
-      "id": 17,
-      "options": {
-        "annotations": {
-          "clustering": -1,
-          "multiLane": false
+              "queryText": "SELECT\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at DESC\nLIMIT 1",
+              "queryType": "table",
+              "rawQueryText": "SELECT\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at DESC\nLIMIT 1",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "title": "Dernier dollar broad",
+          "type": "stat"
         },
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "13.0.2",
-      "targets": [
         {
           "datasource": {
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
-          "queryText": "SELECT\n    observed_at AS time,\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at ASC",
-          "queryType": "table",
-          "rawQueryText": "SELECT\n    observed_at AS time,\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at ASC",
-          "refId": "A",
-          "timeColumns": [
-            "time",
-            "ts"
-          ]
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line"
+                }
+              },
+              "decimals": 2,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 115
+                  },
+                  {
+                    "color": "red",
+                    "value": 122
+                  }
+                ]
+              }
+            }
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 2
+          },
+          "id": 17,
+          "options": {
+            "annotations": {
+              "clustering": -1,
+              "multiLane": false
+            },
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "13.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "frser-sqlite-datasource",
+                "uid": "macro-sqlite"
+              },
+              "queryText": "SELECT\n    observed_at AS time,\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at ASC",
+              "queryType": "table",
+              "rawQueryText": "SELECT\n    observed_at AS time,\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at ASC",
+              "refId": "A",
+              "timeColumns": [
+                "time",
+                "ts"
+              ]
+            }
+          ],
+          "timeFrom": "5y",
+          "title": "U.S. Dollar Index — FRED",
+          "type": "timeseries"
         }
       ],
-      "timeFrom": "5y",
-      "title": "U.S. Dollar Index — FRED",
-      "type": "timeseries"
+      "title": "Dollar",
+      "type": "row"
     },
     {
       "collapsed": true,
@@ -774,9 +776,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 2
       },
-      "id": 20,
+      "id": 23,
       "panels": [
         {
           "datasource": {
@@ -809,7 +811,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 12
+            "y": 3
           },
           "id": 12,
           "options": {
@@ -918,7 +920,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 12
+            "y": 3
           },
           "id": 13,
           "options": {
@@ -969,9 +971,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 3
       },
-      "id": 21,
+      "id": 24,
       "panels": [
         {
           "datasource": {
@@ -1004,7 +1006,7 @@
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 13
+            "y": 4
           },
           "id": 14,
           "options": {
@@ -1113,7 +1115,7 @@
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 13
+            "y": 4
           },
           "id": 15,
           "options": {
@@ -1159,14 +1161,369 @@
       "type": "row"
     },
     {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 25,
+      "title": "Market",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "VIX",
+              "scope": "series"
+            },
+            "properties": [
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": 0
+                    },
+                    {
+                      "color": "orange",
+                      "value": 20
+                    },
+                    {
+                      "color": "red",
+                      "value": 30
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SP500",
+              "scope": "series"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "text",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "NASDAQ",
+              "scope": "series"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 5
+      },
+      "id": 18,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('VIX', 'SP500', 'NASDAQ')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'VIX' THEN m.value END) AS VIX,\n    MAX(CASE WHEN m.symbol = 'SP500' THEN m.value END) AS SP500,\n    MAX(CASE WHEN m.symbol = 'NASDAQ' THEN m.value END) AS NASDAQ\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('VIX', 'SP500', 'NASDAQ')",
+          "queryType": "table",
+          "rawQueryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('VIX', 'SP500', 'NASDAQ')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'VIX' THEN m.value END) AS VIX,\n    MAX(CASE WHEN m.symbol = 'SP500' THEN m.value END) AS SP500,\n    MAX(CASE WHEN m.symbol = 'NASDAQ' THEN m.value END) AS NASDAQ\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('VIX', 'SP500', 'NASDAQ')",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Dernier stress marché",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 20
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 5
+      },
+      "id": 19,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    observed_at AS time,\n    value AS VIX\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'VIX'\nORDER BY observed_at ASC",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    value AS VIX\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'VIX'\nORDER BY observed_at ASC",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "5y",
+      "title": "VIX — FRED",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 5
+      },
+      "id": 20,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "WITH raw_values AS (\n    SELECT\n        observed_at,\n        symbol,\n        value\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('SP500', 'NASDAQ')\n),\nfirst_values AS (\n    SELECT\n        symbol,\n        value AS first_value\n    FROM raw_values\n    WHERE observed_at IN (\n        SELECT MIN(observed_at)\n        FROM raw_values\n        GROUP BY symbol\n    )\n)\nSELECT\n    r.observed_at AS time,\n    MAX(CASE WHEN r.symbol = 'SP500' THEN (r.value / f.first_value) * 100.0 END) AS \"SP500 base 100\",\n    MAX(CASE WHEN r.symbol = 'NASDAQ' THEN (r.value / f.first_value) * 100.0 END) AS \"NASDAQ base 100\"\nFROM raw_values r\nJOIN first_values f\n  ON f.symbol = r.symbol\nGROUP BY r.observed_at\nORDER BY r.observed_at ASC",
+          "queryType": "table",
+          "rawQueryText": "WITH raw_values AS (\n    SELECT\n        observed_at,\n        symbol,\n        value\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('SP500', 'NASDAQ')\n),\nfirst_values AS (\n    SELECT\n        symbol,\n        value AS first_value\n    FROM raw_values\n    WHERE observed_at IN (\n        SELECT MIN(observed_at)\n        FROM raw_values\n        GROUP BY symbol\n    )\n)\nSELECT\n    r.observed_at AS time,\n    MAX(CASE WHEN r.symbol = 'SP500' THEN (r.value / f.first_value) * 100.0 END) AS \"SP500 base 100\",\n    MAX(CASE WHEN r.symbol = 'NASDAQ' THEN (r.value / f.first_value) * 100.0 END) AS \"NASDAQ base 100\"\nFROM raw_values r\nJOIN first_values f\n  ON f.symbol = r.symbol\nGROUP BY r.observed_at\nORDER BY r.observed_at ASC",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "5y",
+      "title": "S&P 500 / Nasdaq base 100 — FRED",
+      "type": "timeseries"
+    },
+    {
       "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 14
       },
-      "id": 22,
+      "id": 26,
       "panels": [
         {
           "datasource": {
@@ -1229,7 +1586,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 14
+            "y": 15
           },
           "id": 4,
           "options": {
@@ -1303,7 +1660,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 14
+            "y": 15
           },
           "id": 7,
           "options": {
@@ -1409,7 +1766,7 @@
             "h": 9,
             "w": 8,
             "x": 16,
-            "y": 14
+            "y": 15
           },
           "id": 2,
           "options": {
@@ -1462,9 +1819,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 15
       },
-      "id": 23,
+      "id": 27,
       "panels": [
         {
           "datasource": {
@@ -1502,7 +1859,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 15
+            "y": 16
           },
           "id": 5,
           "options": {
@@ -1568,7 +1925,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 15
+            "y": 16
           },
           "id": 6,
           "options": {
