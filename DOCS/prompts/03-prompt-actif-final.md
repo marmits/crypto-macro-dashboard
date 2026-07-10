@@ -50,6 +50,7 @@ rendements US
 pétrole
 inflation
 marché risk-on / risk-off
+score macro synthétique
 ```
 
 Le dashboard doit aider à répondre à des questions comme :
@@ -61,6 +62,10 @@ Les taux ou le dollar pèsent-ils sur les cryptos ?
 L’inflation ou la Fed rendent-elles le marché plus fragile ?
 Faut-il être prudent avec les entrées Freqtrade / Hyperliquid ?
 ```
+
+Le dashboard ne doit pas prédire parfaitement le marché.
+
+Il doit seulement contextualiser les signaux du bot et encourager une lecture prudente du régime macro.
 
 ---
 
@@ -206,6 +211,13 @@ docker compose run --rm collector
 
 Il ne contient pas encore de boucle infinie ni de scheduler.
 
+Point important :
+
+```text
+Grafana relit SQLite, mais Grafana ne collecte pas les données.
+Les données ne se mettent à jour que lorsque le collector est lancé.
+```
+
 ---
 
 ## Configuration actuelle du collector
@@ -220,34 +232,99 @@ COINGECKO_BASE_URL=https://api.coingecko.com/api/v3
 
 `COINGECKO_API_KEY` existe comme option future, mais l’usage actuel reste en mode keyless public API.
 
-### Séries FRED actuellement configurées
+---
+
+## Séries FRED actuellement configurées
+
+### Fed / taux
 
 ```text
-FEDFUNDS -> Federal Funds Effective Rate
-DGS2     -> US2Y  -> US 2Y Treasury Yield
-DGS10    -> US10Y -> US 10Y Treasury Yield
-DGS30    -> US30Y -> US 30Y Treasury Yield
+FEDFUNDS -> FEDFUNDS -> Federal Funds Effective Rate
+DGS2     -> US2Y     -> US 2Y Treasury Yield
+DGS10    -> US10Y    -> US 10Y Treasury Yield
+DGS30    -> US30Y    -> US 30Y Treasury Yield
 ```
 
-Configuration d’historique actuelle :
+### Inflation
 
 ```text
-FEDFUNDS -> limit 120
-US2Y     -> limit 1500
-US10Y    -> limit 1500
-US30Y    -> limit 1500
+CPIAUCSL -> CPI      -> Consumer Price Index
+CPILFESL -> CORE_CPI -> Core Consumer Price Index
+PCEPI    -> PCE      -> Personal Consumption Expenditures Price Index
+PCEPILFE -> CORE_PCE -> Core Personal Consumption Expenditures Price Index
+```
+
+Les séries inflation sont stockées comme des indices bruts.
+
+Les variations YoY sont calculées dans Grafana via SQL :
+
+```text
+YoY % = (valeur actuelle / valeur il y a 12 mois - 1) * 100
+```
+
+### Pétrole / énergie
+
+```text
+DCOILWTICO   -> WTI   -> Crude Oil Price WTI
+DCOILBRENTEU -> BRENT -> Crude Oil Price Brent
+```
+
+Unité :
+
+```text
+usd_per_barrel
+```
+
+### Dollar
+
+```text
+DTWEXBGS -> USD_BROAD -> Nominal Broad U.S. Dollar Index
+```
+
+`USD_BROAD` est utilisé comme proxy gratuit et large de la force du dollar.
+
+### Marché / stress risk-on risk-off
+
+```text
+VIXCLS    -> VIX    -> CBOE Volatility Index
+SP500     -> SP500  -> S&P 500
+NASDAQCOM -> NASDAQ -> NASDAQ Composite
+```
+
+---
+
+## Configuration d’historique FRED actuelle
+
+```text
+FEDFUNDS  -> limit 120
+US2Y      -> limit 1500
+US10Y     -> limit 1500
+US30Y     -> limit 1500
+CPI       -> limit 240
+CORE_CPI  -> limit 240
+PCE       -> limit 240
+CORE_PCE  -> limit 240
+WTI       -> limit 1500
+BRENT     -> limit 1500
+USD_BROAD -> limit 1500
+VIX       -> limit 1500
+SP500     -> limit 1500
+NASDAQ    -> limit 1500
 ```
 
 Objectif de ces limites :
 
 ```text
 FEDFUNDS : environ 10 ans de données mensuelles
-US2Y / US10Y / US30Y : environ 5 à 6 ans de données quotidiennes ouvrées
+Inflation : environ 20 ans de données mensuelles
+Séries quotidiennes : environ 5 à 6 ans de données ouvrées
 ```
 
 Les valeurs FRED vides `"."` sont ignorées par le collector.
 
-### Actifs CoinGecko actuellement configurés
+---
+
+## Actifs CoinGecko actuellement configurés
 
 ```text
 bitcoin     -> BTC
@@ -259,6 +336,13 @@ hyperliquid -> HYPE
 CoinGecko est utilisé en mode keyless public API.
 
 Aucune clé API CoinGecko n’est nécessaire pour l’usage actuel.
+
+Attention :
+
+```text
+Le mode keyless est adapté au prototype local.
+Il faut éviter le polling fréquent, car les limites sont partagées par IP.
+```
 
 ---
 
@@ -275,27 +359,22 @@ FEDFUNDS
 US2Y
 US10Y
 US30Y
-```
-
-Mappings FRED :
-
-```text
-FEDFUNDS -> FEDFUNDS
-DGS2     -> US2Y
-DGS10    -> US10Y
-DGS30    -> US30Y
+CPI
+CORE_CPI
+PCE
+CORE_PCE
+WTI
+BRENT
+USD_BROAD
+VIX
+SP500
+NASDAQ
 ```
 
 Statut :
 
 ```text
 DONE
-```
-
-Objectif futur :
-
-```text
-Ajouter progressivement l’inflation, le pétrole, le dollar, la volatilité et d’autres indicateurs macro.
 ```
 
 ### CoinGecko keyless API
@@ -323,22 +402,6 @@ BTC
 ETH
 SOL
 HYPE
-```
-
-Mapping :
-
-```text
-bitcoin     -> BTC
-ethereum    -> ETH
-solana      -> SOL
-hyperliquid -> HYPE
-```
-
-Attention :
-
-```text
-Le mode keyless est adapté au prototype local.
-Il faut éviter le polling fréquent, car les limites sont partagées par IP.
 ```
 
 ---
@@ -451,17 +514,35 @@ Chemin SQLite côté Grafana :
 
 ## Organisation actuelle du dashboard Grafana
 
-Le dashboard est maintenant organisé avec des rows :
+Le dashboard est organisé avec les rows suivantes :
 
 ```text
-Main
+Macro Score
+Fed / Taux
+Dollar
+Inflation
+Energy
+Market
 Cryptos
 Datas
 ```
 
-### Row `Main`
+### Row `Macro Score`
 
-Contient les indicateurs macro principaux :
+Contient :
+
+```text
+Score macro risk-on/off
+Détails du score macro
+```
+
+Cette row est l’entrée principale du dashboard.
+
+Elle donne une lecture rapide du régime macro actuel et explique les règles qui composent le score.
+
+### Row `Fed / Taux`
+
+Contient :
 
 ```text
 Dernier FEDFUNDS
@@ -472,9 +553,46 @@ US 10Y - 2Y Yield Spread — FRED
 Dernier spread 10Y-2Y
 ```
 
+### Row `Dollar`
+
+Contient :
+
+```text
+Dernier dollar broad
+U.S. Dollar Index — FRED
+```
+
+### Row `Inflation`
+
+Contient :
+
+```text
+Dernière inflation YoY
+Inflation YoY — FRED
+```
+
+### Row `Energy`
+
+Contient :
+
+```text
+Derniers prix pétrole
+Oil Prices — FRED
+```
+
+### Row `Market`
+
+Contient :
+
+```text
+Dernier stress marché
+VIX — FRED
+S&P 500 / Nasdaq base 100 — FRED
+```
+
 ### Row `Cryptos`
 
-Contient les indicateurs crypto :
+Contient :
 
 ```text
 BTC/USD — CoinGecko
@@ -500,12 +618,23 @@ Ces panels sont conservés pour vérification mais ne doivent pas encombrer la l
 Le dashboard affiche actuellement :
 
 ```text
+Score macro risk-on/off
+Détails du score macro
 Dernier FEDFUNDS
 FEDFUNDS — Federal Funds Effective Rate
 Derniers rendements US
 US Treasury Yields — FRED
 US 10Y - 2Y Yield Spread — FRED
 Dernier spread 10Y-2Y
+Dernier dollar broad
+U.S. Dollar Index — FRED
+Dernière inflation YoY
+Inflation YoY — FRED
+Derniers prix pétrole
+Oil Prices — FRED
+Dernier stress marché
+VIX — FRED
+S&P 500 / Nasdaq base 100 — FRED
 BTC/USD — CoinGecko
 Derniers prix crypto USD
 Dernier BTC/USD
@@ -513,56 +642,64 @@ Données crypto
 Dernières données macro_series
 ```
 
-Le panel multi-actifs crypto affiche :
+---
+
+## Score macro risk-on / risk-off v1
+
+Le score macro v1 est calculé directement dans Grafana via SQL.
+
+Il n’est pas stocké dans SQLite pour l’instant.
+
+Objectif :
 
 ```text
-BTC_USD
-ETH_USD
-SOL_USD
-HYPE_USD
+Produire une synthèse pédagogique du contexte macro.
+Ne pas déclencher de trade.
+Ne pas prédire le marché.
 ```
 
-Le panel `Derniers rendements US` affiche :
+### Règles actuelles du score v1
 
 ```text
-US2Y
-US10Y
-US30Y
+VIX >= 20                    -> -1
+VIX >= 30                    -> -1 supplémentaire, donc -2 au total pour le VIX
+USD_BROAD >= 122             -> -1
+US10Y >= 5                   -> -1
+Spread 10Y-2Y < 0            -> -1
+WTI >= 90 OR BRENT >= 90     -> -1
+SP500 performance 30j < 0    -> -1
+NASDAQ performance 30j < 0   -> -1
 ```
 
-Le panel `US Treasury Yields — FRED` affiche trois courbes distinctes :
+Score minimum possible :
 
 ```text
-US2Y
-US10Y
-US30Y
+-8
 ```
 
-Le panel `US 10Y - 2Y Yield Spread — FRED` calcule directement :
+### Interprétation actuelle du score
 
 ```text
-US10Y - US2Y
+0 à -1   -> contexte respirable
+-2 à -3  -> prudence
+<= -4    -> risk-off marqué
 ```
 
-Le panel `Dernier spread 10Y-2Y` affiche la dernière valeur du spread.
+### État observé lors de la mise à jour du prompt
 
-Exemple de dernière valeur observée :
+Le score affiché était :
 
 ```text
-US10Y = 4.56%
-US2Y  = 4.21%
-Spread 10Y-2Y = 0.35%
+0
 ```
 
-Interprétation retenue :
+Lecture :
 
 ```text
-Spread < 0       -> courbe inversée / risk-off / rouge
-Spread 0 à 0.5   -> courbe positive mais plate / prudence / orange
-Spread > 0.5     -> courbe plus saine / vert
+contexte macro respirable selon les règles v1
 ```
 
-Le spread actuel autour de `0.350%` est affiché en orange, car il se situe entre `0` et `0.5`.
+Cette lecture reste à observer dans le temps avant d’ajuster les seuils.
 
 ---
 
@@ -575,6 +712,11 @@ BTC/USD — CoinGecko                     -> Last 7 days
 FEDFUNDS — Federal Funds Effective Rate -> Last 5 years
 US Treasury Yields — FRED               -> Last 5 years
 US 10Y - 2Y Yield Spread — FRED         -> Last 5 years
+U.S. Dollar Index — FRED                -> Last 5 years
+Inflation YoY — FRED                    -> Last 10 years
+Oil Prices — FRED                       -> Last 1 year ou Last 3 years selon lisibilité
+VIX — FRED                              -> Last 5 years
+S&P 500 / Nasdaq base 100 — FRED        -> Last 5 years
 ```
 
 Le dashboard global peut rester sur :
@@ -615,46 +757,24 @@ time | value | metric
 
 si Grafana ne sépare pas correctement les séries.
 
-Pour les panels multi-séries comme les rendements US, il faut préférer une requête pivotée :
+Pour les panels multi-séries, il faut préférer une requête pivotée :
 
 ```text
-time | US2Y | US10Y | US30Y
+time | SERIE_1 | SERIE_2 | SERIE_3
 ```
 
-Cela évite les courbes incohérentes où plusieurs séries sont fusionnées sous le nom `value`.
+Exemples concernés :
 
-Exemple de principe SQL utilisé pour les rendements US :
-
-```sql
-SELECT
-    observed_at AS time,
-    MAX(CASE WHEN symbol = 'US2Y' THEN value END) AS US2Y,
-    MAX(CASE WHEN symbol = 'US10Y' THEN value END) AS US10Y,
-    MAX(CASE WHEN symbol = 'US30Y' THEN value END) AS US30Y
-FROM macro_series
-WHERE source = 'fred'
-  AND symbol IN ('US2Y', 'US10Y', 'US30Y')
-GROUP BY observed_at
-ORDER BY observed_at ASC
+```text
+US2Y / US10Y / US30Y
+WTI / BRENT
+CPI YoY / Core CPI YoY / PCE YoY / Core PCE YoY
+SP500 / NASDAQ base 100
 ```
 
 Le spread `10Y-2Y` est calculé directement dans Grafana via SQL, sans nouvelle table SQLite et sans nouvelle série stockée.
 
-Principe SQL :
-
-```sql
-SELECT
-    us10y.observed_at AS time,
-    us10y.value - us2y.value AS "10Y-2Y Spread"
-FROM macro_series us10y
-JOIN macro_series us2y
-  ON us2y.observed_at = us10y.observed_at
-WHERE us10y.source = 'fred'
-  AND us2y.source = 'fred'
-  AND us10y.symbol = 'US10Y'
-  AND us2y.symbol = 'US2Y'
-ORDER BY us10y.observed_at ASC
-```
+Le score macro v1 est également calculé dans Grafana via SQL.
 
 ---
 
@@ -757,7 +877,9 @@ curl -s -u admin:123456 "http://localhost:9070/api/search?query=Crypto" | python
 ### Exporter un dashboard Grafana
 
 ```bash
-curl -s -u admin:123456   "http://localhost:9070/api/dashboards/uid/UID_DU_DASHBOARD"   | python3 -m json.tool > /tmp/crypto-macro-dashboard-export.json
+curl -s -u admin:123456 \
+  "http://localhost:9070/api/dashboards/uid/UID_DU_DASHBOARD" \
+  | python3 -m json.tool > /tmp/crypto-macro-dashboard-export.json
 ```
 
 ### Redémarrer Grafana
@@ -766,7 +888,7 @@ curl -s -u admin:123456   "http://localhost:9070/api/dashboards/uid/UID_DU_DASHB
 docker compose restart grafana
 ```
 
-### Vérifier les séries FRED collectées
+### Vérifier toutes les séries FRED principales
 
 ```bash
 docker compose run --rm --entrypoint python collector - <<'PY'
@@ -784,7 +906,22 @@ rows = conn.execute(
         MAX(observed_at) AS last_observed_at
     FROM macro_series
     WHERE source = 'fred'
-      AND symbol IN ('FEDFUNDS', 'US2Y', 'US10Y', 'US30Y')
+      AND symbol IN (
+          'FEDFUNDS',
+          'US2Y',
+          'US10Y',
+          'US30Y',
+          'CPI',
+          'CORE_CPI',
+          'PCE',
+          'CORE_PCE',
+          'WTI',
+          'BRENT',
+          'USD_BROAD',
+          'VIX',
+          'SP500',
+          'NASDAQ'
+      )
     GROUP BY source, symbol
     ORDER BY symbol
     """
@@ -835,429 +972,270 @@ PY
 
 ## Statut des étapes
 
-### Étape 1 — Grafana local
-
 ```text
-DONE
+Étape 1  — Grafana local                         DONE
+Étape 2  — Collector Python + SQLite             DONE
+Étape 3  — FRED FEDFUNDS                         DONE
+Étape 4  — Grafana SQLite                        DONE
+Étape 5  — CoinGecko BTC/USD                     DONE
+Étape 6  — Panels BTC/USD                        DONE
+Étape 7  — ETH, SOL, HYPE                        DONE
+Étape 8  — Panels crypto multi-actifs            DONE
+Étape 9  — updated_at                            DONE
+Étape 9.1 — Horizons temporels des panels        DONE
+Étape 10 — Rendements US depuis FRED             DONE
+Étape 10.1 — Panels Grafana rendements US        DONE
+Étape 10.2 — Historique FRED étendu              DONE
+Étape 11 — Courbe 10Y - 2Y                       DONE
+Étape 12 — Inflation CPI / Core CPI / PCE / Core PCE DONE
+Étape 12.2 — Panels inflation YoY                DONE
+Étape 13 — Pétrole WTI / Brent                   DONE
+Étape 13.2 — Panels pétrole                      DONE
+Étape 14 — Dollar proxy USD_BROAD                DONE
+Étape 14.2 — Panels dollar                       DONE
+Étape 15 — VIX / SP500 / NASDAQ                  DONE
+Étape 15.2 — Panels Market                       DONE
+Étape 16 — Score macro risk-on / risk-off v1     DONE
 ```
 
-Grafana fonctionne sur :
+---
+
+## Objectif fonctionnel atteint à ce stade
+
+Le dashboard couvre maintenant :
 
 ```text
-http://localhost:9070
+Fed
+rendements US
+courbe 10Y - 2Y
+dollar
+inflation
+pétrole
+stress marché
+S&P 500 / Nasdaq
+cryptos
+score macro risk-on / risk-off v1
 ```
 
-### Étape 2 — Collector Python + SQLite
-
-```text
-DONE
-```
-
-Le collector Dockerisé écrit dans :
-
-```text
-data/macro.db
-```
-
-### Étape 3 — FRED FEDFUNDS
-
-```text
-DONE
-```
-
-La série `FEDFUNDS` est collectée depuis FRED et stockée en SQLite.
-
-### Étape 4 — Grafana SQLite
-
-```text
-DONE
-```
-
-Grafana lit SQLite via `frser-sqlite-datasource`.
-
-### Étape 5 — CoinGecko BTC/USD
-
-```text
-DONE
-```
-
-BTC/USD est collecté via CoinGecko keyless.
-
-### Étape 6 — Panels BTC/USD
-
-```text
-DONE
-```
-
-BTC/USD est affiché dans Grafana.
-
-### Étape 7 — ETH, SOL, HYPE
-
-```text
-DONE
-```
-
-ETH, SOL et HYPE sont collectés via CoinGecko keyless.
-
-### Étape 8 — Panels crypto multi-actifs
-
-```text
-DONE
-```
-
-Le dashboard affiche maintenant BTC, ETH, SOL et HYPE.
-
-### Étape 9 — `updated_at`
-
-```text
-DONE
-```
-
-Le modèle SQLite distingue maintenant :
-
-```text
-observed_at
-created_at
-updated_at
-```
-
-### Étape 9.1 — Horizons temporels des panels Grafana
-
-```text
-DONE
-```
-
-Les panels macro et crypto utilisent des horizons temporels cohérents :
-
-```text
-BTC/USD — CoinGecko                     -> Last 7 days
-FEDFUNDS — Federal Funds Effective Rate -> Last 5 years
-```
-
-### Étape 10 — Ajouter les rendements US depuis FRED
-
-```text
-DONE
-```
-
-Les rendements US sont collectés depuis FRED :
-
-```text
-DGS2   -> US2Y
-DGS10  -> US10Y
-DGS30  -> US30Y
-```
-
-### Étape 10.1 — Panels Grafana des rendements US
-
-```text
-DONE
-```
-
-Le dashboard affiche :
-
-```text
-Derniers rendements US
-US Treasury Yields — FRED
-```
-
-### Étape 10.2 — Historique FRED étendu
-
-```text
-DONE
-```
-
-L’historique FRED a été augmenté :
-
-```text
-FEDFUNDS -> limit 120
-US2Y     -> limit 1500
-US10Y    -> limit 1500
-US30Y    -> limit 1500
-```
-
-### Étape 11 — Courbe 10Y - 2Y
-
-```text
-DONE
-```
-
-Le dashboard affiche :
-
-```text
-US 10Y - 2Y Yield Spread — FRED
-Dernier spread 10Y-2Y
-```
-
-Le spread est calculé dans Grafana par SQL :
-
-```text
-US10Y - US2Y
-```
+Il s’agit d’une première version macro complète et exploitable.
 
 ---
 
 ## Objectif fonctionnel cible à terme
 
-Le dashboard doit évoluer vers une structure couvrant :
+Le dashboard doit continuer à rester simple et lisible.
+
+À terme, il peut évoluer vers :
 
 ```text
-Fed
-taux
-force du dollar
-rendements US
-pétrole
-inflation
-marché risk-on / risk-off
-```
-
-### Fed / politique monétaire
-
-Déjà intégré :
-
-```text
-FEDFUNDS
-```
-
-À enrichir plus tard :
-
-```text
-autres indicateurs de politique monétaire si utile
-```
-
-### Taux / rendements US
-
-Déjà intégré :
-
-```text
-US2Y
-US10Y
-US30Y
-Yield curve 10Y - 2Y
-```
-
-Objectif :
-
-```text
-Suivre la pression des taux sur les actifs risqués.
-Identifier les phases de tension sur les rendements.
-Mesurer la pente ou l’inversion de la courbe des taux.
-```
-
-### Force du dollar
-
-À intégrer progressivement :
-
-```text
-DXY
-ou proxy dollar gratuit
-```
-
-Objectif :
-
-```text
-Suivre la force du dollar.
-Un dollar fort est souvent défavorable aux actifs risqués et aux cryptos.
-```
-
-### Pétrole / énergie
-
-À intégrer progressivement :
-
-```text
-WTI
-Brent
-```
-
-Objectif :
-
-```text
-Suivre les tensions énergie / inflation.
-Une forte hausse du pétrole peut peser sur l’inflation et le contexte risk-on.
-```
-
-### Inflation
-
-À intégrer progressivement :
-
-```text
-CPI
-Core CPI
-PCE
-Core PCE
-```
-
-Objectif :
-
-```text
-Suivre la tendance inflationniste.
-Comprendre le contexte de politique monétaire de la Fed.
-```
-
-### Marché risk-on / risk-off
-
-À intégrer progressivement :
-
-```text
-VIX
-S&P 500
-Nasdaq
-BTC
-ETH
-SOL
-HYPE
-```
-
-Déjà intégré :
-
-```text
-BTC
-ETH
-SOL
-HYPE
+Score macro v2
+score historisé
+scheduler du collector
+meilleure lecture crypto 7j / 30j
+alertes visuelles non-trading
+éventuelle migration base de données si SQLite devient limitant
 ```
 
 ---
 
-## Dashboard cible à terme
+## Évolutions possibles — non prioritaires
 
-Structure cible indicative :
+### 1. Stabilisation UX du dashboard
 
-### Ligne 1 — Synthèse
+Améliorations possibles :
 
 ```text
-Score macro
-État risk-on / risk-off
-BTC
-DXY
-US10Y
-VIX
+Ajuster la pagination du panel Détails du score macro
+Afficher les 8 lignes du score sans pagination
+Réduire la largeur du panel Score macro si nécessaire
+Agrandir le panel Détails du score macro via gridPos JSON si nécessaire
+Replier certaines rows par défaut selon l’usage quotidien
+Raccourcir les libellés des règles si la table déborde horizontalement
 ```
 
-### Ligne 2 — Fed / taux
+Priorité :
 
 ```text
-Fed Funds Rate
-US2Y
-US10Y
-US30Y
-10Y-2Y spread
+faible à moyenne
 ```
 
-### Ligne 3 — Dollar / pétrole
+### 2. Automatisation du collector
 
-```text
-DXY
-WTI
-Brent
+Actuellement, la collecte est manuelle :
+
+```bash
+docker compose run --rm collector
 ```
 
-### Ligne 4 — Inflation
+Évolutions possibles :
 
 ```text
-CPI YoY
-Core CPI YoY
-PCE YoY
-Core PCE YoY
+cron côté host
+service Docker en boucle simple
+service scheduler dédié
+séparation des fréquences macro / crypto
 ```
 
-### Ligne 5 — Crypto
+Fréquences indicatives :
 
 ```text
-BTC
-ETH
-SOL
-HYPE
+FRED macro : 1 fois par jour suffit largement
+CoinGecko crypto : 15 à 60 minutes si besoin, en restant prudent avec les limites keyless
 ```
 
-### Ligne 6 — Interprétation
+Priorité :
 
 ```text
-Macro favorable
-Macro neutre
-Macro défavorable
-Risk-on
-Risk-off
-Prudence sur les entrées Freqtrade
+moyenne
+```
+
+### 3. Score macro v2
+
+Améliorations possibles :
+
+```text
+Ajouter l’inflation au score
+Ajouter la variation USD_BROAD 30j / 90j
+Ajouter la variation US10Y 30j / 90j
+Ajouter la variation pétrole 30j
+Ajouter BTC 7j / 30j uniquement si la collecte crypto devient régulière
+Ajouter une pondération légère si certaines règles sont trop fortes ou trop faibles
+```
+
+Exemples de règles v2 possibles :
+
+```text
+Core PCE YoY > 3.0        -> -1
+CPI YoY > 3.5             -> -1
+USD_BROAD en hausse 30j   -> -1
+US10Y en hausse 30j       -> -1
+WTI en hausse forte 30j   -> -1
+BTC 7j < 0                -> -1
+```
+
+Priorité :
+
+```text
+moyenne, après observation du score v1
+```
+
+### 4. Historisation du score
+
+Aujourd’hui, le score est calculé dans Grafana via SQL mais n’est pas stocké.
+
+Évolution possible :
+
+```text
+Calculer le score dans le collector
+Stocker une série dédiée dans SQLite
+Symbol possible : MACRO_SCORE
+Ajouter observed_at / created_at / updated_at comme pour les autres séries
+Afficher l’historique du score dans Grafana
+```
+
+Cette évolution serait utile si l’on veut observer :
+
+```text
+les périodes risk-on / risk-off dans le temps
+les changements de régime macro
+l’évolution du score avant les signaux Freqtrade / Hyperliquid
+```
+
+Priorité :
+
+```text
+moyenne à long terme
+```
+
+### 5. Amélioration crypto
+
+Améliorations possibles :
+
+```text
+scheduler plus régulier pour BTC / ETH / SOL / HYPE
+variation BTC 7j / 30j
+variation ETH / SOL / HYPE 7j / 30j
+panel crypto base 100
+intégration éventuelle au score v2
+```
+
+Attention :
+
+```text
+Ne pas poller CoinGecko trop fréquemment en mode keyless.
+```
+
+Priorité :
+
+```text
+moyenne, après automatisation du collector
+```
+
+### 6. Alertes visuelles non-trading
+
+Possibilités :
+
+```text
+alerte Grafana si score <= -4
+alerte si VIX >= 30
+alerte si USD_BROAD >= 122
+alerte si US10Y >= 5
+alerte si pétrole >= 90
+```
+
+Important :
+
+```text
+Ces alertes doivent rester informatives.
+Elles ne doivent déclencher aucun trade automatiquement.
+```
+
+Priorité :
+
+```text
+faible à moyenne
+```
+
+### 7. Migration de stockage éventuelle
+
+SQLite reste adapté au prototype local.
+
+Migration future possible si besoin :
+
+```text
+PostgreSQL
+InfluxDB
+Prometheus
+```
+
+Mais ce n’est pas prioritaire tant que :
+
+```text
+le volume reste faible
+la collecte reste simple
+Grafana lit correctement SQLite
+```
+
+Priorité :
+
+```text
+faible
 ```
 
 ---
 
-## Score risk-on / risk-off cible
+## Prochaine priorité recommandée
 
-Le projet doit évoluer vers un score simple, lisible et pédagogique.
+La prochaine priorité n’est pas forcément une nouvelle donnée.
 
-Exemple de règles futures :
-
-```text
-DXY en hausse forte        -> -1
-US10Y en hausse forte      -> -1
-US2Y en hausse forte       -> -1
-Courbe 10Y-2Y inversée     -> -1
-VIX élevé                  -> -1
-Pétrole en hausse forte    -> -1
-BTC en baisse forte        -> -1
-Nasdaq en baisse forte     -> -1
-```
-
-Interprétation possible :
+Je recommande plutôt :
 
 ```text
-Score >= 0        -> contexte respirable
-Score entre -1/-3 -> prudence
-Score <= -4       -> risk-off marqué
-```
-
-Le score doit rester volontairement simple au départ.
-
-Il ne doit pas chercher à prédire parfaitement le marché.
-
-Il doit uniquement aider à contextualiser les signaux Freqtrade / Hyperliquid.
-
----
-
-## Prochaines étapes recommandées
-
-Les prochaines étapes doivent enrichir le dashboard vers son objectif fonctionnel final.
-
-Priorité proposée :
-
-```text
-Étape 12 — Ajouter inflation : CPI / Core CPI / PCE / Core PCE
-Étape 13 — Ajouter pétrole : WTI / Brent
-Étape 14 — Ajouter dollar : DXY ou proxy gratuit
-Étape 15 — Ajouter VIX / Nasdaq / S&P 500 si source gratuite fiable
-Étape 16 — Construire un premier score risk-on / risk-off simple
-```
-
-Le score risk-on / risk-off doit idéalement venir après quelques indicateurs macro supplémentaires, pour éviter de construire un score basé uniquement sur `FEDFUNDS`, les rendements US et les cryptos.
-
----
-
-## Prochaine étape immédiate
-
-La prochaine étape fonctionnelle est :
-
-```text
-Étape 12 — Ajouter l’inflation : CPI / Core CPI / PCE / Core PCE
-```
-
-Objectif de l’étape 12 :
-
-```text
-Commencer à suivre la pression inflationniste
-Comprendre le contexte de politique monétaire de la Fed
-Préparer progressivement le futur score risk-on / risk-off
-```
-
-Approche recommandée :
-
-```text
-1. Ajouter les séries inflation dans FRED_SERIES
-2. Collecter les données dans SQLite
-3. Vérifier les dernières observations
-4. Ajouter ensuite les panels Grafana
-5. Ne pas encore complexifier le score risk-on / risk-off
+1. Exporter et commiter le dashboard final
+2. Observer le score macro v1 pendant quelques jours
+3. Stabiliser l’ergonomie du dashboard si nécessaire
+4. Automatiser le collector avec une solution simple
+5. Envisager ensuite le score macro v2
 ```
 
 ---
@@ -1310,6 +1288,16 @@ git commit -m "refactor: ajoute updated_at aux séries macro"
 git commit -m "feat: ajoute les rendements us depuis fred"
 git commit -m "feat: augmente l'historique fred des rendements us"
 git commit -m "feat: ajoute le spread 10y 2y au dashboard grafana"
+git commit -m "feat: ajoute les series inflation depuis fred"
+git commit -m "feat: ajoute les panels inflation yoy au dashboard grafana"
+git commit -m "feat: ajoute les prix du petrole depuis fred"
+git commit -m "feat: ajoute les panels petrole au dashboard grafana"
+git commit -m "feat: ajoute un proxy dollar depuis fred"
+git commit -m "feat: ajoute les panels dollar au dashboard grafana"
+git commit -m "feat: ajoute vix sp500 et nasdaq depuis fred"
+git commit -m "feat: ajoute les panels marche au dashboard grafana"
+git commit -m "feat: ajoute un score macro risk-on risk-off"
+git commit -m "docs: met a jour le prompt actif apres la v1 macro complete"
 ```
 
 ---
@@ -1330,10 +1318,15 @@ Collector Python Dockerisé
 SQLite
 FRED FEDFUNDS
 FRED US2Y / US10Y / US30Y
+Inflation CPI / CORE_CPI / PCE / CORE_PCE
+Pétrole WTI / BRENT
+Dollar USD_BROAD
+VIX / SP500 / NASDAQ
 Courbe 10Y - 2Y calculée dans Grafana
+Score macro risk-on / risk-off v1 calculé dans Grafana
 CoinGecko BTC / ETH / SOL / HYPE
 Dashboard Grafana provisionné
-Rows Grafana Main / Cryptos / Datas
+Rows Grafana Macro Score / Fed-Taux / Dollar / Inflation / Energy / Market / Cryptos / Datas
 Panels macro avec horizons temporels cohérents
 Workflow Grafana par copie + export JSON
 Modèle SQLite avec observed_at / created_at / updated_at
