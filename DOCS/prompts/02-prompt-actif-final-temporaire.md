@@ -437,10 +437,11 @@ crypto-macro-dashboard/
 │ └── macro.db
 ├── docker-compose.yml
 ├── DOCS
-│ ├── 00-prompt-actif.md
-│ ├── 01-prompt-actif.md
 │ ├── 02-workflow-grafana-dashboard.md
-│ └── 03-prompt-actif-final-temporaire.md
+│ └── prompts
+│     ├── 00-prompt-actif.md
+│     ├── 01-prompt-actif.md
+│     └── 02-prompt-actif-final-temporaire.md
 ├── grafana
 │ ├── dashboards
 │ │ └── crypto-macro-overview.json
