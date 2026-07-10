@@ -71,6 +71,20 @@ FRED_SERIES = {
         "unit": "index",
         "limit": 240,
     },
+    "DCOILWTICO": {
+            "source": "fred",
+            "symbol": "WTI",
+            "name": "Crude Oil Price WTI",
+            "unit": "usd_per_barrel",
+            "limit": 1500,
+    },
+    "DCOILBRENTEU": {
+        "source": "fred",
+        "symbol": "BRENT",
+        "name": "Crude Oil Price Brent",
+        "unit": "usd_per_barrel",
+        "limit": 1500,
+    },
 }
 
 COINGECKO_COINS = {
