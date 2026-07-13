@@ -1,5 +1,9 @@
 import sqlite3
-from storage import upsert_macro_observation
+from storage import (
+    now_iso,
+    upsert_macro_observation,
+)
+from derived import collect_derived_metrics
 from datetime import datetime, timezone
 from typing import Any
 
@@ -27,8 +31,6 @@ from config import (
 """
 
 
-def now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
 
 
 def fred_date_to_iso(date_value: str) -> str:
@@ -141,11 +143,18 @@ def fetch_fred_observations(series_id: str, limit: int = 12) -> list[dict[str, A
     return list(reversed(cleaned_observations))
 
 
-def fetch_coingecko_simple_price(coin_id: str) -> dict[str, Any]:
+def fetch_coingecko_simple_prices() -> dict[str, Any]:
+    """
+    Récupère les prix de toutes les cryptos de COINGECKO_COINS
+    en une seule requête HTTP.
+    """
+
     url = f"{COINGECKO_BASE_URL}/simple/price"
 
+    coin_ids = ",".join(COINGECKO_COINS.keys())
+
     params = {
-        "ids": coin_id,
+        "ids": coin_ids,
         "vs_currencies": "usd",
         "include_24hr_change": "true",
         "include_last_updated_at": "true",
@@ -155,24 +164,18 @@ def fetch_coingecko_simple_price(coin_id: str) -> dict[str, Any]:
         "accept": "application/json",
     }
 
-    """ if COINGECKO_API_KEY:
-        headers["x-cg-demo-api-key"] = COINGECKO_API_KEY
-    """
+    response = requests.get(
+        url,
+        params=params,
+        headers=headers,
+        timeout=30,
+    )
 
-    response = requests.get(url, params=params, headers=headers, timeout=30)
     response.raise_for_status()
 
     payload = response.json()
 
-    if coin_id not in payload:
-        raise RuntimeError(f"Réponse CoinGecko inattendue : coin absent '{coin_id}'")
-
-    coin_payload = payload[coin_id]
-
-    if "usd" not in coin_payload:
-        raise RuntimeError(f"Réponse CoinGecko inattendue : prix USD absent pour '{coin_id}'")
-
-    return coin_payload
+    return payload
 
 def fetch_coingecko_global() -> dict[str, Any]:
     """
@@ -267,12 +270,13 @@ def collect_fred_series(connection: sqlite3.Connection, series_id: str) -> None:
     )
 
 
-def collect_coingecko_coin(connection: sqlite3.Connection, coin_id: str) -> None:
+def save_coingecko_coin(
+    connection: sqlite3.Connection,
+    coin_id: str,
+    coin_payload: dict[str, Any],
+) -> None:
+
     coin_config = COINGECKO_COINS[coin_id]
-
-    print(f"Collecte CoinGecko en cours : {coin_id}")
-
-    coin_payload = fetch_coingecko_simple_price(coin_id)
 
     price = float(coin_payload["usd"])
 
@@ -293,21 +297,12 @@ def collect_coingecko_coin(connection: sqlite3.Connection, coin_id: str) -> None
         observed_at=observed_at,
     )
 
-    change_24h = coin_payload.get("usd_24h_change")
-
     print(
         {
-            "source": coin_config["source"],
             "symbol": coin_config["symbol"],
-            "name": coin_config["name"],
             "value": price,
-            "unit": coin_config["unit"],
-            "observed_at": observed_at,
-            "usd_24h_change": change_24h,
         }
     )
-
-    print(f"Observation CoinGecko traitée pour {coin_config['symbol']}.")
 
 
 def collect_coingecko_global(connection: sqlite3.Connection) -> None:
@@ -394,10 +389,24 @@ def main() -> None:
         for series_id in FRED_SERIES.keys():
             collect_fred_series(connection, series_id)
 
+        prices = fetch_coingecko_simple_prices()
+        print(f"CoinGecko : {len(prices)} crypto(s) récupérée(s)")
+
         for coin_id in COINGECKO_COINS.keys():
-            collect_coingecko_coin(connection, coin_id)
+
+            if coin_id not in prices:
+                print(f"⚠️ CoinGecko n'a pas renvoyé {coin_id}")
+                continue
+
+            save_coingecko_coin(
+                connection,
+                coin_id,
+                prices[coin_id],
+            )
 
         collect_coingecko_global(connection)
+
+        collect_derived_metrics(connection)
 
         connection.commit()
 
