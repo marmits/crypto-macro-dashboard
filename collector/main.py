@@ -1,4 +1,5 @@
 import sqlite3
+from storage import upsert_macro_observation
 from datetime import datetime, timezone
 from typing import Any
 
@@ -173,49 +174,68 @@ def fetch_coingecko_simple_price(coin_id: str) -> dict[str, Any]:
 
     return coin_payload
 
+def fetch_coingecko_global() -> dict[str, Any]:
+    """
+    Récupère les métriques globales du marché crypto via CoinGecko.
+    """
 
-def upsert_macro_observation(
-    connection: sqlite3.Connection,
-    source: str,
-    symbol: str,
-    name: str,
-    value: float,
-    unit: str,
-    observed_at: str,
-) -> None:
-    current_time = now_iso()
+    url = f"{COINGECKO_BASE_URL}/global"
 
-    connection.execute(
-        """
-        INSERT INTO macro_series (
-            source,
-            symbol,
-            name,
-            value,
-            unit,
-            observed_at,
-            created_at,
-            updated_at
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(source, symbol, observed_at)
-        DO UPDATE SET
-            name = excluded.name,
-            value = excluded.value,
-            unit = excluded.unit,
-            updated_at = excluded.updated_at
-        """,
-        (
-            source,
-            symbol,
-            name,
-            value,
-            unit,
-            observed_at,
-            current_time,
-            current_time,
-        ),
+    headers = {
+        "accept": "application/json",
+    }
+
+    response = requests.get(
+        url,
+        headers=headers,
+        timeout=30,
     )
+
+    response.raise_for_status()
+
+    payload = response.json()
+
+    if "data" not in payload:
+        raise RuntimeError(
+            "Réponse CoinGecko inattendue : 'data' absent."
+        )
+
+    return payload["data"]
+
+GLOBAL_METRICS = {
+    "BTC_DOM": {
+        "name": "Bitcoin Dominance",
+        "unit": "percent",
+        "getter": lambda data: data["market_cap_percentage"]["btc"],
+    },
+    "ETH_DOM": {
+        "name": "Ethereum Dominance",
+        "unit": "percent",
+        "getter": lambda data: data["market_cap_percentage"]["eth"],
+    },
+    "TOTAL_MCAP": {
+        "name": "Total Crypto Market Cap",
+        "unit": "usd",
+        "getter": lambda data: data["total_market_cap"]["usd"],
+    },
+    "TOTAL_VOLUME": {
+        "name": "Total Crypto Volume",
+        "unit": "usd",
+        "getter": lambda data: data["total_volume"]["usd"],
+    },
+    "ACTIVE_COINS": {
+        "name": "Active Cryptocurrencies",
+        "unit": "count",
+        "getter": lambda data: data["active_cryptocurrencies"],
+    },
+    "ACTIVE_MARKETS": {
+        "name": "Active Markets",
+        "unit": "count",
+        "getter": lambda data: data["markets"],
+    },
+}
+
+
 
 
 def collect_fred_series(connection: sqlite3.Connection, series_id: str) -> None:
@@ -290,6 +310,37 @@ def collect_coingecko_coin(connection: sqlite3.Connection, coin_id: str) -> None
     print(f"Observation CoinGecko traitée pour {coin_config['symbol']}.")
 
 
+def collect_coingecko_global(connection: sqlite3.Connection) -> None:
+    print("Collecte CoinGecko globale en cours")
+
+    payload = fetch_coingecko_global()
+
+    observed_at = now_iso()
+
+    for symbol, metric in GLOBAL_METRICS.items():
+
+        value = float(metric["getter"](payload))
+
+        upsert_macro_observation(
+            connection=connection,
+            source="coingecko",
+            symbol=symbol,
+            name=metric["name"],
+            value=value,
+            unit=metric["unit"],
+            observed_at=observed_at,
+        )
+
+        print(
+            {
+                "symbol": symbol,
+                "value": value,
+            }
+        )
+
+    print("Collecte CoinGecko globale terminée.")
+
+
 def print_existing_rows(connection: sqlite3.Connection) -> None:
     rows = connection.execute(
         """
@@ -345,6 +396,8 @@ def main() -> None:
 
         for coin_id in COINGECKO_COINS.keys():
             collect_coingecko_coin(connection, coin_id)
+
+        collect_coingecko_global(connection)
 
         connection.commit()
 

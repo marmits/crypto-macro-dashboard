@@ -27,5 +27,14 @@ services:
     volumes:
       - ./data:/data
 
+  sqlite:
+    build:
+      context: .
+      dockerfile: Dockerfile.sqlite
+    container_name: crypto-macro-sqlite
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+
 volumes:
   grafana-storage:
