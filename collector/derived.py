@@ -115,6 +115,24 @@ def previous_current(
 
     return values[-2], values[-1]
 
+
+def latest_metric(
+    history: dict[str, list[float]],
+    symbol: str,
+) -> float | None:
+    """
+    Retourne la dernière valeur connue d'un symbole.
+
+    Renvoie None si absente.
+    """
+
+    values = history.get(symbol)
+
+    if not values:
+        return None
+
+    return values[-1]
+
 def trend_signal(
     previous: float,
     current: float,
@@ -231,18 +249,22 @@ def collect_derived_metrics(connection: sqlite3.Connection) -> None:
 
     for source_symbol, signal_symbol, signal_name, inverted in SIGNALS:
 
-        pair = previous_current(
+        previous = latest_metric(
             history,
             source_symbol,
         )
 
-        if pair is None:
+        if previous is None:
             continue
 
+        current = metrics[source_symbol]
+
         signal = trend_signal(
-            *pair,
+            previous,
+            current,
             inverted=inverted,
         )
+
 
         analysis_metrics.append(
             (
