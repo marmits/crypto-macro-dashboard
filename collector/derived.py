@@ -11,24 +11,28 @@ SIGNALS = (
         "BTC_DOM",
         "BTC_DOM_SIGNAL",
         "Bitcoin Dominance Signal",
+        "percent",
         True,
     ),
     (
         "STABLECOIN_DOM",
         "STABLECOIN_SIGNAL",
         "Stablecoin Dominance Signal",
+        "percent",
         True,
     ),
     (
         "ETH_BTC",
         "ETH_BTC_SIGNAL",
         "ETH / BTC Signal",
+        "ratio",
         False,
     ),
     (
         "TOTAL3",
         "TOTAL3_SIGNAL",
         "TOTAL3 Signal",
+        "usd",
         False,
     ),
 )
@@ -56,12 +60,11 @@ def load_latest_metrics(connection: sqlite3.Connection) -> dict[str, float]:
         for row in cursor.fetchall()
     }
 
-def load_metric_history(
+def load_previous_metrics(
     connection: sqlite3.Connection,
-) -> dict[str, list[float]]:
+) -> dict[str, float]:
     """
-    Charge les deux dernières observations disponibles pour chaque symbole,
-    de la plus ancienne à la plus récente.
+    Charge la dernière valeur connue de chaque symbole.
     """
 
     cursor = connection.execute(
@@ -79,20 +82,14 @@ def load_metric_history(
                 ) AS rn
             FROM macro_series
         )
-        WHERE rn <= 2
-        ORDER BY symbol, rn DESC;
+        WHERE rn = 1;
         """
     )
 
-    history: dict[str, list[float]] = {}
-
-    for symbol, value in cursor.fetchall():
-
-        history.setdefault(symbol, []).append(
-            float(value)
-        )
-
-    return history
+    return {
+        symbol: float(value)
+        for symbol, value in cursor.fetchall()
+    }
 
 
 def previous_current(
@@ -116,22 +113,7 @@ def previous_current(
     return values[-2], values[-1]
 
 
-def latest_metric(
-    history: dict[str, list[float]],
-    symbol: str,
-) -> float | None:
-    """
-    Retourne la dernière valeur connue d'un symbole.
 
-    Renvoie None si absente.
-    """
-
-    values = history.get(symbol)
-
-    if not values:
-        return None
-
-    return values[-1]
 
 def trend_signal(
     previous: float,
@@ -159,6 +141,7 @@ def trend_signal(
         signal *= -1
     
     return signal
+
 
 def market_regime_state(
     score: int,
@@ -229,7 +212,7 @@ def collect_derived_metrics(connection: sqlite3.Connection) -> None:
     # ==========================================
 
     metrics = load_latest_metrics(connection)
-    history = load_metric_history(connection)
+    previous_metrics = load_previous_metrics(connection)
 
     # ==========================================
     # Calcul des métriques dérivées
@@ -246,13 +229,17 @@ def collect_derived_metrics(connection: sqlite3.Connection) -> None:
     # ==========================================
 
     analysis_metrics = []
+    analysis_details = []
 
-    for source_symbol, signal_symbol, signal_name, inverted in SIGNALS:
+    for (
+        source_symbol,
+        signal_symbol,
+        signal_name,
+        unit,
+        inverted,
+    ) in SIGNALS:
 
-        previous = latest_metric(
-            history,
-            source_symbol,
-        )
+        previous = previous_metrics.get(source_symbol)
 
         if previous is None:
             continue
@@ -265,7 +252,6 @@ def collect_derived_metrics(connection: sqlite3.Connection) -> None:
             inverted=inverted,
         )
 
-
         analysis_metrics.append(
             (
                 signal_symbol,
@@ -273,6 +259,23 @@ def collect_derived_metrics(connection: sqlite3.Connection) -> None:
                 signal,
                 "points",
             )
+        )
+
+        analysis_details.extend(
+            [
+                (
+                    f"{source_symbol}_PREVIOUS",
+                    f"{source_symbol} Previous",
+                    previous,
+                    unit,
+                ),
+                (
+                    f"{source_symbol}_CURRENT",
+                    f"{source_symbol} Current",
+                    current,
+                    unit,
+                ),
+            ]
         )
 
     # ==========================================
@@ -304,10 +307,10 @@ def collect_derived_metrics(connection: sqlite3.Connection) -> None:
             market_regime_state_value,
             "state",
         )
-    )   
+    )
 
     # ==========================================
-    # Liste complète des métriques à enregistrer
+    # Liste complète des métriques
     # ==========================================
 
     observed_at = now_iso()
@@ -346,6 +349,7 @@ def collect_derived_metrics(connection: sqlite3.Connection) -> None:
     ]
 
     derived_metrics.extend(analysis_metrics)
+    derived_metrics.extend(analysis_details)
 
     # ==========================================
     # Enregistrement
