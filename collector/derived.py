@@ -38,6 +38,14 @@ def compute_btc_market_cap(metrics: dict[str, float]) -> float:
 def compute_eth_market_cap(metrics: dict[str, float]) -> float:
     return metrics["TOTAL_MCAP"] * metrics["ETH_DOM"] / 100.0
 
+def compute_stablecoin_dominance(
+    metrics: dict[str, float],
+) -> float:
+    return (
+        metrics["STABLECOIN_MCAP"]
+        / metrics["TOTAL_MCAP"]
+        * 100.0
+    )
 
 def compute_total3(metrics: dict[str, float]) -> float:
     return (
@@ -55,6 +63,7 @@ def collect_derived_metrics(connection: sqlite3.Connection) -> None:
 
     metrics["BTC_MCAP"] = compute_btc_market_cap(metrics)
     metrics["ETH_MCAP"] = compute_eth_market_cap(metrics)
+    metrics["STABLECOIN_DOM"] = compute_stablecoin_dominance(metrics)
     metrics["TOTAL3"] = compute_total3(metrics)
 
     observed_at = now_iso()
@@ -71,6 +80,12 @@ def collect_derived_metrics(connection: sqlite3.Connection) -> None:
             "Ethereum Market Cap",
             metrics["ETH_MCAP"],
             "usd",
+        ),
+        (
+            "STABLECOIN_DOM",
+            "Stablecoin Dominance",
+            metrics["STABLECOIN_DOM"],
+            "percent",
         ),
         (
             "TOTAL3",

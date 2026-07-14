@@ -194,6 +194,10 @@ def fetch_coingecko_global() -> dict[str, Any]:
         timeout=30,
     )
 
+    if not response.ok:
+        print("Status :", response.status_code)
+        print("Body   :", response.text)
+
     response.raise_for_status()
 
     payload = response.json()
@@ -204,6 +208,40 @@ def fetch_coingecko_global() -> dict[str, Any]:
         )
 
     return payload["data"]
+
+def fetch_coingecko_categories() -> list[dict[str, Any]]:
+    """
+    Récupère toutes les catégories CoinGecko.
+    """
+
+    url = f"{COINGECKO_BASE_URL}/coins/categories"
+
+    response = requests.get(
+        url,
+        headers={"accept": "application/json"},
+        timeout=30,
+    )
+
+    response.raise_for_status()
+
+    return response.json()
+
+def find_category(
+    categories: list[dict[str, Any]],
+    category_id: str,
+) -> dict[str, Any]:
+    """
+    Recherche une catégorie CoinGecko par son identifiant.
+    """
+
+    for category in categories:
+
+        if category["id"] == category_id:
+            return category
+
+    raise RuntimeError(
+        f"Catégorie CoinGecko introuvable : {category_id}"
+    )
 
 GLOBAL_METRICS = {
     "BTC_DOM": {
@@ -310,6 +348,13 @@ def collect_coingecko_global(connection: sqlite3.Connection) -> None:
 
     payload = fetch_coingecko_global()
 
+    categories = fetch_coingecko_categories()
+
+    stablecoins = find_category(
+        categories,
+        "stablecoins",
+    )
+
     observed_at = now_iso()
 
     for symbol, metric in GLOBAL_METRICS.items():
@@ -332,6 +377,23 @@ def collect_coingecko_global(connection: sqlite3.Connection) -> None:
                 "value": value,
             }
         )
+
+    upsert_macro_observation(
+        connection=connection,
+        source="coingecko",
+        symbol="STABLECOIN_MCAP",
+        name="Stablecoin Market Cap",
+        value=float(stablecoins["market_cap"]),
+        unit="usd",
+        observed_at=observed_at,
+    )
+
+    print(
+        {
+            "symbol": "STABLECOIN_MCAP",
+            "value": stablecoins["market_cap"],
+        }
+    )
 
     print("Collecte CoinGecko globale terminée.")
 
