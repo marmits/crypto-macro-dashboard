@@ -15,7 +15,6 @@
       }
     ]
   },
-  "description": "",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -30,8 +29,8 @@
         "x": 0,
         "y": 0
       },
-      "id": 31,
-      "title": "Macro Score",
+      "id": 44,
+      "title": "Crypto Signals",
       "type": "row"
     },
     {
@@ -39,97 +38,60 @@
         "type": "frser-sqlite-datasource",
         "uid": "macro-sqlite"
       },
-      "description": "Synthèse pédagogique du contexte macro. 0 à -1 : contexte respirable ; -2 à -3 : prudence ; <= -4 : risk-off marqué. Ce score ne déclenche aucun trade.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 0,
           "mappings": [
             {
               "options": {
                 "-1": {
-                  "color": "green",
-                  "index": 1,
-                  "text": "Contexte respirable"
-                },
-                "-2": {
-                  "color": "orange",
-                  "index": 2,
-                  "text": "Prudence"
-                },
-                "-3": {
-                  "color": "orange",
-                  "index": 3,
-                  "text": "Prudence"
-                },
-                "-4": {
-                  "color": "red",
-                  "index": 4,
-                  "text": "Risk-off marqué"
-                },
-                "-5": {
-                  "color": "red",
-                  "index": 5,
-                  "text": "Risk-off marqué"
-                },
-                "-6": {
-                  "color": "red",
-                  "index": 6,
-                  "text": "Risk-off marqué"
-                },
-                "-7": {
-                  "color": "red",
-                  "index": 7,
-                  "text": "Risk-off marqué"
-                },
-                "-8": {
-                  "color": "red",
-                  "index": 8,
-                  "text": "Risk-off marqué"
+                  "index": 0,
+                  "text": "Bearish"
                 },
                 "0": {
-                  "color": "green",
-                  "index": 0,
-                  "text": "Contexte respirable"
+                  "index": 1,
+                  "text": "Neutral"
+                },
+                "1": {
+                  "index": 2,
+                  "text": "Bullish"
                 }
               },
               "type": "value"
             }
           ],
-          "max": 0,
-          "min": -8,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "dark-red",
                 "value": 0
               },
               {
-                "color": "orange",
-                "value": -3
+                "color": "text",
+                "value": 0
               },
               {
-                "color": "green",
-                "value": -1
+                "color": "dark-green",
+                "value": 1
               }
             ]
           }
         }
       },
       "gridPos": {
-        "h": 10,
-        "w": 8,
+        "h": 7,
+        "w": 3,
         "x": 0,
         "y": 1
       },
-      "id": 29,
+      "id": 37,
       "options": {
-        "colorMode": "background_solid",
+        "colorMode": "value",
         "graphMode": "none",
-        "justifyMode": "center",
+        "justifyMode": "auto",
         "orientation": "auto",
         "percentChangeColorMode": "standard",
         "reduceOptions": {
@@ -140,7 +102,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "auto",
         "wideLayout": true
       },
       "pluginVersion": "13.0.2",
@@ -150,12 +112,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
-          "format": "table",
-          "queryText": "WITH latest AS (\n    SELECT\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'VIX' ORDER BY observed_at DESC LIMIT 1) AS vix,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'USD_BROAD' ORDER BY observed_at DESC LIMIT 1) AS usd_broad,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'US10Y' ORDER BY observed_at DESC LIMIT 1) AS us10y,\n        (\n            SELECT us10y.value - us2y.value\n            FROM macro_series us10y\n            JOIN macro_series us2y\n              ON us2y.observed_at = us10y.observed_at\n            WHERE us10y.source = 'fred'\n              AND us2y.source = 'fred'\n              AND us10y.symbol = 'US10Y'\n              AND us2y.symbol = 'US2Y'\n            ORDER BY us10y.observed_at DESC\n            LIMIT 1\n        ) AS spread_10y_2y,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'WTI' ORDER BY observed_at DESC LIMIT 1) AS wti,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'BRENT' ORDER BY observed_at DESC LIMIT 1) AS brent,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'SP500' ORDER BY observed_at DESC LIMIT 1) AS sp500_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'SP500'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'SP500'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS sp500_30d,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ' ORDER BY observed_at DESC LIMIT 1) AS nasdaq_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'NASDAQ'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS nasdaq_30d\n)\nSELECT\n    (CASE WHEN vix >= 20 THEN -1 ELSE 0 END)\n  + (CASE WHEN vix >= 30 THEN -1 ELSE 0 END)\n  + (CASE WHEN usd_broad >= 122 THEN -1 ELSE 0 END)\n  + (CASE WHEN us10y >= 5 THEN -1 ELSE 0 END)\n  + (CASE WHEN spread_10y_2y < 0 THEN -1 ELSE 0 END)\n  + (CASE WHEN wti >= 90 OR brent >= 90 THEN -1 ELSE 0 END)\n  + (CASE WHEN sp500_30d IS NOT NULL AND sp500_latest < sp500_30d THEN -1 ELSE 0 END)\n  + (CASE WHEN nasdaq_30d IS NOT NULL AND nasdaq_latest < nasdaq_30d THEN -1 ELSE 0 END)\n    AS \"Score macro\"\nFROM latest;",
-          "queryType": "raw",
-          "rawQuery": true,
-          "rawQueryText": "WITH latest AS (\n    SELECT\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'VIX' ORDER BY observed_at DESC LIMIT 1) AS vix,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'USD_BROAD' ORDER BY observed_at DESC LIMIT 1) AS usd_broad,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'US10Y' ORDER BY observed_at DESC LIMIT 1) AS us10y,\n        (\n            SELECT us10y.value - us2y.value\n            FROM macro_series us10y\n            JOIN macro_series us2y\n              ON us2y.observed_at = us10y.observed_at\n            WHERE us10y.source = 'fred'\n              AND us2y.source = 'fred'\n              AND us10y.symbol = 'US10Y'\n              AND us2y.symbol = 'US2Y'\n            ORDER BY us10y.observed_at DESC\n            LIMIT 1\n        ) AS spread_10y_2y,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'WTI' ORDER BY observed_at DESC LIMIT 1) AS wti,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'BRENT' ORDER BY observed_at DESC LIMIT 1) AS brent,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'SP500' ORDER BY observed_at DESC LIMIT 1) AS sp500_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'SP500'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'SP500'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS sp500_30d,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ' ORDER BY observed_at DESC LIMIT 1) AS nasdaq_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'NASDAQ'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS nasdaq_30d\n)\nSELECT\n    (CASE WHEN vix >= 20 THEN -1 ELSE 0 END)\n  + (CASE WHEN vix >= 30 THEN -1 ELSE 0 END)\n  + (CASE WHEN usd_broad >= 122 THEN -1 ELSE 0 END)\n  + (CASE WHEN us10y >= 5 THEN -1 ELSE 0 END)\n  + (CASE WHEN spread_10y_2y < 0 THEN -1 ELSE 0 END)\n  + (CASE WHEN wti >= 90 OR brent >= 90 THEN -1 ELSE 0 END)\n  + (CASE WHEN sp500_30d IS NOT NULL AND sp500_latest < sp500_30d THEN -1 ELSE 0 END)\n  + (CASE WHEN nasdaq_30d IS NOT NULL AND nasdaq_latest < nasdaq_30d THEN -1 ELSE 0 END)\n    AS \"Score macro\"\nFROM latest;",
-          "rawSql": "WITH latest AS (\n    SELECT\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'VIX' ORDER BY observed_at DESC LIMIT 1) AS vix,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'USD_BROAD' ORDER BY observed_at DESC LIMIT 1) AS usd_broad,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'US10Y' ORDER BY observed_at DESC LIMIT 1) AS us10y,\n        (\n            SELECT us10y.value - us2y.value\n            FROM macro_series us10y\n            JOIN macro_series us2y\n              ON us2y.observed_at = us10y.observed_at\n            WHERE us10y.source = 'fred'\n              AND us2y.source = 'fred'\n              AND us10y.symbol = 'US10Y'\n              AND us2y.symbol = 'US2Y'\n            ORDER BY us10y.observed_at DESC\n            LIMIT 1\n        ) AS spread_10y_2y,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'WTI' ORDER BY observed_at DESC LIMIT 1) AS wti,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'BRENT' ORDER BY observed_at DESC LIMIT 1) AS brent,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'SP500' ORDER BY observed_at DESC LIMIT 1) AS sp500_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'SP500'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'SP500'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS sp500_30d,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ' ORDER BY observed_at DESC LIMIT 1) AS nasdaq_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'NASDAQ'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS nasdaq_30d\n)\nSELECT\n    (CASE WHEN vix >= 20 THEN -1 ELSE 0 END)\n  + (CASE WHEN vix >= 30 THEN -1 ELSE 0 END)\n  + (CASE WHEN usd_broad >= 122 THEN -1 ELSE 0 END)\n  + (CASE WHEN us10y >= 5 THEN -1 ELSE 0 END)\n  + (CASE WHEN spread_10y_2y < 0 THEN -1 ELSE 0 END)\n  + (CASE WHEN wti >= 90 OR brent >= 90 THEN -1 ELSE 0 END)\n  + (CASE WHEN sp500_30d IS NOT NULL AND sp500_latest < sp500_30d THEN -1 ELSE 0 END)\n  + (CASE WHEN nasdaq_30d IS NOT NULL AND nasdaq_latest < nasdaq_30d THEN -1 ELSE 0 END)\n    AS \"Score macro\"\nFROM latest;",
+          "queryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol='BTC_DOM_SIGNAL'\nORDER BY observed_at; ",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol='BTC_DOM_SIGNAL'\nORDER BY observed_at; ",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -163,7 +122,7 @@
           ]
         }
       ],
-      "title": "Score macro risk-on/off",
+      "title": "BTC Dominance Signal",
       "type": "stat"
     },
     {
@@ -171,9 +130,287 @@
         "type": "frser-sqlite-datasource",
         "uid": "macro-sqlite"
       },
-      "description": "Détail des huit règles composant le score macro v1. Un impact de -1 indique qu'une règle de prudence est active.",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "-1": {
+                  "index": 0,
+                  "text": "Bearish"
+                },
+                "0": {
+                  "index": 1,
+                  "text": "Neutral"
+                },
+                "1": {
+                  "index": 2,
+                  "text": "Bullish"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": 0
+              },
+              {
+                "color": "text",
+                "value": 0
+              },
+              {
+                "color": "dark-green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 3,
+        "x": 3,
+        "y": 1
+      },
+      "id": 40,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol='STABLECOIN_SIGNAL'\nORDER BY observed_at; ",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol='STABLECOIN_SIGNAL'\nORDER BY observed_at; ",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Stablecoin Signal",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "-1": {
+                  "index": 0,
+                  "text": "Bearish"
+                },
+                "0": {
+                  "index": 1,
+                  "text": "Neutral"
+                },
+                "1": {
+                  "index": 2,
+                  "text": "Bullish"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": 0
+              },
+              {
+                "color": "text",
+                "value": 0
+              },
+              {
+                "color": "dark-green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 3,
+        "x": 6,
+        "y": 1
+      },
+      "id": 41,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol='ETH_BTC_SIGNAL'\nORDER BY observed_at; ",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol='ETH_BTC_SIGNAL'\nORDER BY observed_at; ",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "ETH/BTC Signal",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "-1": {
+                  "index": 0,
+                  "text": "Bearish"
+                },
+                "0": {
+                  "index": 1,
+                  "text": "Neutral"
+                },
+                "1": {
+                  "index": 2,
+                  "text": "Bullish"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": 0
+              },
+              {
+                "color": "text",
+                "value": 0
+              },
+              {
+                "color": "dark-green",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 3,
+        "x": 9,
+        "y": 1
+      },
+      "id": 42,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol='TOTAL3_SIGNAL'\nORDER BY observed_at; ",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol='TOTAL3_SIGNAL'\nORDER BY observed_at; ",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "TOTAL3 Signal",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {
             "align": "auto",
             "cellOptions": {
@@ -184,18 +421,131 @@
             },
             "inspect": false
           },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Previous",
+              "scope": "series"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 7
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Current",
+              "scope": "series"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 7
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "id": 43,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Δ"
+          }
+        ]
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "WITH latest AS (\n    SELECT\n        symbol,\n        value\n    FROM macro_series\n    WHERE id IN (\n        SELECT MAX(id)\n        FROM macro_series\n        GROUP BY symbol\n    )\n)\n\nSELECT\n    '🟠 BTC Dominance' AS Indicator,\n\n    printf('%.2f %%',\n        (SELECT value FROM latest WHERE symbol='BTC_DOM_PREVIOUS')\n    ) AS Previous,\n\n    printf('%.2f %%',\n        (SELECT value FROM latest WHERE symbol='BTC_DOM_CURRENT')\n    ) AS Current,\n\n    printf('%+.3f %%',\n        (SELECT value FROM latest WHERE symbol='BTC_DOM_CURRENT')\n        -\n        (SELECT value FROM latest WHERE symbol='BTC_DOM_PREVIOUS')\n    ) AS \"Δ\",\n\n    CASE\n        WHEN (SELECT value FROM latest WHERE symbol='BTC_DOM_CURRENT')\n           > (SELECT value FROM latest WHERE symbol='BTC_DOM_PREVIOUS')\n        THEN '↑'\n        WHEN (SELECT value FROM latest WHERE symbol='BTC_DOM_CURRENT')\n           < (SELECT value FROM latest WHERE symbol='BTC_DOM_PREVIOUS')\n        THEN '↓'\n        ELSE '→'\n    END AS Trend,\n\n    CASE (SELECT value FROM latest WHERE symbol='BTC_DOM_SIGNAL')\n        WHEN 1 THEN '🟢 Bullish'\n        WHEN 0 THEN '🟡 Neutral'\n        ELSE '🔴 Bearish'\n    END AS Signal,\n\n    CASE (SELECT value FROM latest WHERE symbol='BTC_DOM_SIGNAL')\n        WHEN 1 THEN '+1'\n        WHEN 0 THEN '0'\n        ELSE '-1'\n    END AS Contribution\n\nUNION ALL\n\nSELECT\n    '💵 Stablecoin Dominance',\n\n    printf('%.2f %%',\n        (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_PREVIOUS')\n    ),\n\n    printf('%.2f %%',\n        (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_CURRENT')\n    ),\n\n    printf('%+.3f %%',\n        (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_CURRENT')\n        -\n        (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_PREVIOUS')\n    ),\n\n    CASE\n        WHEN (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_CURRENT')\n           > (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_PREVIOUS')\n        THEN '↑'\n        WHEN (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_CURRENT')\n           < (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_PREVIOUS')\n        THEN '↓'\n        ELSE '→'\n    END,\n\n    CASE (SELECT value FROM latest WHERE symbol='STABLECOIN_SIGNAL')\n        WHEN 1 THEN '🟢 Bullish'\n        WHEN 0 THEN '🟡 Neutral'\n        ELSE '🔴 Bearish'\n    END,\n\n    CASE (SELECT value FROM latest WHERE symbol='STABLECOIN_SIGNAL')\n        WHEN 1 THEN '+1'\n        WHEN 0 THEN '0'\n        ELSE '-1'\n    END\n\nUNION ALL\n\nSELECT\n    '🔷 ETH / BTC',\n\n    printf('%.8f',\n        (SELECT value FROM latest WHERE symbol='ETH_BTC_PREVIOUS')\n    ),\n\n    printf('%.8f',\n        (SELECT value FROM latest WHERE symbol='ETH_BTC_CURRENT')\n    ),\n\n    printf('%+.8f',\n        (SELECT value FROM latest WHERE symbol='ETH_BTC_CURRENT')\n        -\n        (SELECT value FROM latest WHERE symbol='ETH_BTC_PREVIOUS')\n    ),\n\n    CASE\n        WHEN (SELECT value FROM latest WHERE symbol='ETH_BTC_CURRENT')\n           > (SELECT value FROM latest WHERE symbol='ETH_BTC_PREVIOUS')\n        THEN '↑'\n        WHEN (SELECT value FROM latest WHERE symbol='ETH_BTC_CURRENT')\n           < (SELECT value FROM latest WHERE symbol='ETH_BTC_PREVIOUS')\n        THEN '↓'\n        ELSE '→'\n    END,\n\n    CASE (SELECT value FROM latest WHERE symbol='ETH_BTC_SIGNAL')\n        WHEN 1 THEN '🟢 Bullish'\n        WHEN 0 THEN '🟡 Neutral'\n        ELSE '🔴 Bearish'\n    END,\n\n    CASE (SELECT value FROM latest WHERE symbol='ETH_BTC_SIGNAL')\n        WHEN 1 THEN '+1'\n        WHEN 0 THEN '0'\n        ELSE '-1'\n    END\n\nUNION ALL\n\nSELECT\n    '🪙 TOTAL3',\n\n    printf('%.1f B$',\n        (SELECT value FROM latest WHERE symbol='TOTAL3_PREVIOUS') / 1000000000.0\n    ),\n\n    printf('%.1f B$',\n        (SELECT value FROM latest WHERE symbol='TOTAL3_CURRENT') / 1000000000.0\n    ),\n\n    printf('%+.1f B$',\n        (\n            (SELECT value FROM latest WHERE symbol='TOTAL3_CURRENT')\n            -\n            (SELECT value FROM latest WHERE symbol='TOTAL3_PREVIOUS')\n        ) / 1000000000.0\n    ),\n\n    CASE\n        WHEN (SELECT value FROM latest WHERE symbol='TOTAL3_CURRENT')\n           > (SELECT value FROM latest WHERE symbol='TOTAL3_PREVIOUS')\n        THEN '↑'\n        WHEN (SELECT value FROM latest WHERE symbol='TOTAL3_CURRENT')\n           < (SELECT value FROM latest WHERE symbol='TOTAL3_PREVIOUS')\n        THEN '↓'\n        ELSE '→'\n    END,\n\n    CASE (SELECT value FROM latest WHERE symbol='TOTAL3_SIGNAL')\n        WHEN 1 THEN '🟢 Bullish'\n        WHEN 0 THEN '🟡 Neutral'\n        ELSE '🔴 Bearish'\n    END,\n\n    CASE (SELECT value FROM latest WHERE symbol='TOTAL3_SIGNAL')\n        WHEN 1 THEN '+1'\n        WHEN 0 THEN '0'\n        ELSE '-1'\n    END;\n",
+          "queryType": "table",
+          "rawQueryText": "WITH latest AS (\n    SELECT\n        symbol,\n        value\n    FROM macro_series\n    WHERE id IN (\n        SELECT MAX(id)\n        FROM macro_series\n        GROUP BY symbol\n    )\n)\n\nSELECT\n    '🟠 BTC Dominance' AS Indicator,\n\n    printf('%.2f %%',\n        (SELECT value FROM latest WHERE symbol='BTC_DOM_PREVIOUS')\n    ) AS Previous,\n\n    printf('%.2f %%',\n        (SELECT value FROM latest WHERE symbol='BTC_DOM_CURRENT')\n    ) AS Current,\n\n    printf('%+.3f %%',\n        (SELECT value FROM latest WHERE symbol='BTC_DOM_CURRENT')\n        -\n        (SELECT value FROM latest WHERE symbol='BTC_DOM_PREVIOUS')\n    ) AS \"Δ\",\n\n    CASE\n        WHEN (SELECT value FROM latest WHERE symbol='BTC_DOM_CURRENT')\n           > (SELECT value FROM latest WHERE symbol='BTC_DOM_PREVIOUS')\n        THEN '↑'\n        WHEN (SELECT value FROM latest WHERE symbol='BTC_DOM_CURRENT')\n           < (SELECT value FROM latest WHERE symbol='BTC_DOM_PREVIOUS')\n        THEN '↓'\n        ELSE '→'\n    END AS Trend,\n\n    CASE (SELECT value FROM latest WHERE symbol='BTC_DOM_SIGNAL')\n        WHEN 1 THEN '🟢 Bullish'\n        WHEN 0 THEN '🟡 Neutral'\n        ELSE '🔴 Bearish'\n    END AS Signal,\n\n    CASE (SELECT value FROM latest WHERE symbol='BTC_DOM_SIGNAL')\n        WHEN 1 THEN '+1'\n        WHEN 0 THEN '0'\n        ELSE '-1'\n    END AS Contribution\n\nUNION ALL\n\nSELECT\n    '💵 Stablecoin Dominance',\n\n    printf('%.2f %%',\n        (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_PREVIOUS')\n    ),\n\n    printf('%.2f %%',\n        (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_CURRENT')\n    ),\n\n    printf('%+.3f %%',\n        (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_CURRENT')\n        -\n        (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_PREVIOUS')\n    ),\n\n    CASE\n        WHEN (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_CURRENT')\n           > (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_PREVIOUS')\n        THEN '↑'\n        WHEN (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_CURRENT')\n           < (SELECT value FROM latest WHERE symbol='STABLECOIN_DOM_PREVIOUS')\n        THEN '↓'\n        ELSE '→'\n    END,\n\n    CASE (SELECT value FROM latest WHERE symbol='STABLECOIN_SIGNAL')\n        WHEN 1 THEN '🟢 Bullish'\n        WHEN 0 THEN '🟡 Neutral'\n        ELSE '🔴 Bearish'\n    END,\n\n    CASE (SELECT value FROM latest WHERE symbol='STABLECOIN_SIGNAL')\n        WHEN 1 THEN '+1'\n        WHEN 0 THEN '0'\n        ELSE '-1'\n    END\n\nUNION ALL\n\nSELECT\n    '🔷 ETH / BTC',\n\n    printf('%.8f',\n        (SELECT value FROM latest WHERE symbol='ETH_BTC_PREVIOUS')\n    ),\n\n    printf('%.8f',\n        (SELECT value FROM latest WHERE symbol='ETH_BTC_CURRENT')\n    ),\n\n    printf('%+.8f',\n        (SELECT value FROM latest WHERE symbol='ETH_BTC_CURRENT')\n        -\n        (SELECT value FROM latest WHERE symbol='ETH_BTC_PREVIOUS')\n    ),\n\n    CASE\n        WHEN (SELECT value FROM latest WHERE symbol='ETH_BTC_CURRENT')\n           > (SELECT value FROM latest WHERE symbol='ETH_BTC_PREVIOUS')\n        THEN '↑'\n        WHEN (SELECT value FROM latest WHERE symbol='ETH_BTC_CURRENT')\n           < (SELECT value FROM latest WHERE symbol='ETH_BTC_PREVIOUS')\n        THEN '↓'\n        ELSE '→'\n    END,\n\n    CASE (SELECT value FROM latest WHERE symbol='ETH_BTC_SIGNAL')\n        WHEN 1 THEN '🟢 Bullish'\n        WHEN 0 THEN '🟡 Neutral'\n        ELSE '🔴 Bearish'\n    END,\n\n    CASE (SELECT value FROM latest WHERE symbol='ETH_BTC_SIGNAL')\n        WHEN 1 THEN '+1'\n        WHEN 0 THEN '0'\n        ELSE '-1'\n    END\n\nUNION ALL\n\nSELECT\n    '🪙 TOTAL3',\n\n    printf('%.1f B$',\n        (SELECT value FROM latest WHERE symbol='TOTAL3_PREVIOUS') / 1000000000.0\n    ),\n\n    printf('%.1f B$',\n        (SELECT value FROM latest WHERE symbol='TOTAL3_CURRENT') / 1000000000.0\n    ),\n\n    printf('%+.1f B$',\n        (\n            (SELECT value FROM latest WHERE symbol='TOTAL3_CURRENT')\n            -\n            (SELECT value FROM latest WHERE symbol='TOTAL3_PREVIOUS')\n        ) / 1000000000.0\n    ),\n\n    CASE\n        WHEN (SELECT value FROM latest WHERE symbol='TOTAL3_CURRENT')\n           > (SELECT value FROM latest WHERE symbol='TOTAL3_PREVIOUS')\n        THEN '↑'\n        WHEN (SELECT value FROM latest WHERE symbol='TOTAL3_CURRENT')\n           < (SELECT value FROM latest WHERE symbol='TOTAL3_PREVIOUS')\n        THEN '↓'\n        ELSE '→'\n    END,\n\n    CASE (SELECT value FROM latest WHERE symbol='TOTAL3_SIGNAL')\n        WHEN 1 THEN '🟢 Bullish'\n        WHEN 0 THEN '🟡 Neutral'\n        ELSE '🔴 Bearish'\n    END,\n\n    CASE (SELECT value FROM latest WHERE symbol='TOTAL3_SIGNAL')\n        WHEN 1 THEN '+1'\n        WHEN 0 THEN '0'\n        ELSE '-1'\n    END;\n",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Score Explanation",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 45,
+      "title": "Crypto Market Regime",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
             {
               "options": {
-                "-1": {
-                  "color": "red",
-                  "index": 1,
-                  "text": "Active"
-                },
                 "0": {
-                  "color": "green",
+                  "color": "dark-red",
                   "index": 0,
-                  "text": "Inactive"
+                  "text": "Risk-Off"
+                },
+                "1": {
+                  "color": "dark-orange",
+                  "index": 1,
+                  "text": "Defensive"
+                },
+                "2": {
+                  "color": "text",
+                  "index": 2,
+                  "text": "Neutral"
+                },
+                "3": {
+                  "color": "semi-dark-green",
+                  "index": 3,
+                  "text": "Bullish"
+                },
+                "4": {
+                  "color": "dark-green",
+                  "index": 4,
+                  "text": "Risk-On"
                 }
               },
               "type": "value"
@@ -207,63 +557,34 @@
               {
                 "color": "green",
                 "value": 0
-              },
-              {
-                "color": "red",
-                "value": 0
               }
             ]
           }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Impact"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-text"
-                }
-              },
-              {
-                "id": "thresholds",
-                "value": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "red",
-                      "value": 0
-                    },
-                    {
-                      "color": "green",
-                      "value": 0
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        ]
+        }
       },
       "gridPos": {
-        "h": 10,
-        "w": 16,
-        "x": 8,
-        "y": 1
+        "h": 3,
+        "w": 6,
+        "x": 0,
+        "y": 9
       },
-      "id": 30,
+      "id": 35,
       "options": {
-        "cellHeight": "sm",
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": false,
-            "displayName": "Ordre"
-          }
-        ]
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
       "pluginVersion": "13.0.2",
       "targets": [
@@ -272,12 +593,9 @@
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
-          "format": "table",
-          "queryText": "WITH latest AS (\n    SELECT\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'VIX' ORDER BY observed_at DESC LIMIT 1) AS vix,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'USD_BROAD' ORDER BY observed_at DESC LIMIT 1) AS usd_broad,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'US10Y' ORDER BY observed_at DESC LIMIT 1) AS us10y,\n        (\n            SELECT us10y.value - us2y.value\n            FROM macro_series us10y\n            JOIN macro_series us2y\n              ON us2y.observed_at = us10y.observed_at\n            WHERE us10y.source = 'fred'\n              AND us2y.source = 'fred'\n              AND us10y.symbol = 'US10Y'\n              AND us2y.symbol = 'US2Y'\n            ORDER BY us10y.observed_at DESC\n            LIMIT 1\n        ) AS spread_10y_2y,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'WTI' ORDER BY observed_at DESC LIMIT 1) AS wti,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'BRENT' ORDER BY observed_at DESC LIMIT 1) AS brent,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'SP500' ORDER BY observed_at DESC LIMIT 1) AS sp500_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'SP500'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'SP500'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS sp500_30d,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ' ORDER BY observed_at DESC LIMIT 1) AS nasdaq_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'NASDAQ'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS nasdaq_30d\n),\nmetrics AS (\n    SELECT\n        *,\n        CASE WHEN sp500_30d IS NOT NULL AND sp500_30d <> 0\n             THEN ((sp500_latest / sp500_30d) - 1.0) * 100.0 END AS sp500_perf_30d,\n        CASE WHEN nasdaq_30d IS NOT NULL AND nasdaq_30d <> 0\n             THEN ((nasdaq_latest / nasdaq_30d) - 1.0) * 100.0 END AS nasdaq_perf_30d\n    FROM latest\n)\nSELECT 1 AS \"Ordre\", 'VIX >= 20' AS \"Règle\",\n       CASE WHEN vix IS NULL THEN 'N/D' ELSE printf('%.2f', vix) END AS \"Valeur\",\n       CASE WHEN vix >= 20 THEN -1 ELSE 0 END AS \"Impact\"\nFROM metrics\nUNION ALL\nSELECT 2, 'VIX >= 30',\n       CASE WHEN vix IS NULL THEN 'N/D' ELSE printf('%.2f', vix) END,\n       CASE WHEN vix >= 30 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 3, 'USD_BROAD >= 122',\n       CASE WHEN usd_broad IS NULL THEN 'N/D' ELSE printf('%.2f', usd_broad) END,\n       CASE WHEN usd_broad >= 122 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 4, 'US10Y >= 5',\n       CASE WHEN us10y IS NULL THEN 'N/D' ELSE printf('%.2f %%', us10y) END,\n       CASE WHEN us10y >= 5 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 5, 'Spread 10Y-2Y < 0',\n       CASE WHEN spread_10y_2y IS NULL THEN 'N/D' ELSE printf('%.3f %%', spread_10y_2y) END,\n       CASE WHEN spread_10y_2y < 0 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 6, 'WTI ou Brent >= 90',\n       CASE WHEN wti IS NULL AND brent IS NULL THEN 'N/D'\n            ELSE printf('WTI %.2f / Brent %.2f', wti, brent) END,\n       CASE WHEN wti >= 90 OR brent >= 90 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 7, 'Performance SP500 sur 30j < 0',\n       CASE WHEN sp500_perf_30d IS NULL THEN 'N/D' ELSE printf('%.2f %%', sp500_perf_30d) END,\n       CASE WHEN sp500_perf_30d < 0 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 8, 'Performance NASDAQ sur 30j < 0',\n       CASE WHEN nasdaq_perf_30d IS NULL THEN 'N/D' ELSE printf('%.2f %%', nasdaq_perf_30d) END,\n       CASE WHEN nasdaq_perf_30d < 0 THEN -1 ELSE 0 END\nFROM metrics\nORDER BY \"Ordre\";",
-          "queryType": "raw",
-          "rawQuery": true,
-          "rawQueryText": "WITH latest AS (\n    SELECT\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'VIX' ORDER BY observed_at DESC LIMIT 1) AS vix,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'USD_BROAD' ORDER BY observed_at DESC LIMIT 1) AS usd_broad,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'US10Y' ORDER BY observed_at DESC LIMIT 1) AS us10y,\n        (\n            SELECT us10y.value - us2y.value\n            FROM macro_series us10y\n            JOIN macro_series us2y\n              ON us2y.observed_at = us10y.observed_at\n            WHERE us10y.source = 'fred'\n              AND us2y.source = 'fred'\n              AND us10y.symbol = 'US10Y'\n              AND us2y.symbol = 'US2Y'\n            ORDER BY us10y.observed_at DESC\n            LIMIT 1\n        ) AS spread_10y_2y,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'WTI' ORDER BY observed_at DESC LIMIT 1) AS wti,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'BRENT' ORDER BY observed_at DESC LIMIT 1) AS brent,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'SP500' ORDER BY observed_at DESC LIMIT 1) AS sp500_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'SP500'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'SP500'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS sp500_30d,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ' ORDER BY observed_at DESC LIMIT 1) AS nasdaq_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'NASDAQ'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS nasdaq_30d\n),\nmetrics AS (\n    SELECT\n        *,\n        CASE WHEN sp500_30d IS NOT NULL AND sp500_30d <> 0\n             THEN ((sp500_latest / sp500_30d) - 1.0) * 100.0 END AS sp500_perf_30d,\n        CASE WHEN nasdaq_30d IS NOT NULL AND nasdaq_30d <> 0\n             THEN ((nasdaq_latest / nasdaq_30d) - 1.0) * 100.0 END AS nasdaq_perf_30d\n    FROM latest\n)\nSELECT 1 AS \"Ordre\", 'VIX >= 20' AS \"Règle\",\n       CASE WHEN vix IS NULL THEN 'N/D' ELSE printf('%.2f', vix) END AS \"Valeur\",\n       CASE WHEN vix >= 20 THEN -1 ELSE 0 END AS \"Impact\"\nFROM metrics\nUNION ALL\nSELECT 2, 'VIX >= 30',\n       CASE WHEN vix IS NULL THEN 'N/D' ELSE printf('%.2f', vix) END,\n       CASE WHEN vix >= 30 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 3, 'USD_BROAD >= 122',\n       CASE WHEN usd_broad IS NULL THEN 'N/D' ELSE printf('%.2f', usd_broad) END,\n       CASE WHEN usd_broad >= 122 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 4, 'US10Y >= 5',\n       CASE WHEN us10y IS NULL THEN 'N/D' ELSE printf('%.2f %%', us10y) END,\n       CASE WHEN us10y >= 5 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 5, 'Spread 10Y-2Y < 0',\n       CASE WHEN spread_10y_2y IS NULL THEN 'N/D' ELSE printf('%.3f %%', spread_10y_2y) END,\n       CASE WHEN spread_10y_2y < 0 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 6, 'WTI ou Brent >= 90',\n       CASE WHEN wti IS NULL AND brent IS NULL THEN 'N/D'\n            ELSE printf('WTI %.2f / Brent %.2f', wti, brent) END,\n       CASE WHEN wti >= 90 OR brent >= 90 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 7, 'Performance SP500 sur 30j < 0',\n       CASE WHEN sp500_perf_30d IS NULL THEN 'N/D' ELSE printf('%.2f %%', sp500_perf_30d) END,\n       CASE WHEN sp500_perf_30d < 0 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 8, 'Performance NASDAQ sur 30j < 0',\n       CASE WHEN nasdaq_perf_30d IS NULL THEN 'N/D' ELSE printf('%.2f %%', nasdaq_perf_30d) END,\n       CASE WHEN nasdaq_perf_30d < 0 THEN -1 ELSE 0 END\nFROM metrics\nORDER BY \"Ordre\";",
-          "rawSql": "WITH latest AS (\n    SELECT\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'VIX' ORDER BY observed_at DESC LIMIT 1) AS vix,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'USD_BROAD' ORDER BY observed_at DESC LIMIT 1) AS usd_broad,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'US10Y' ORDER BY observed_at DESC LIMIT 1) AS us10y,\n        (\n            SELECT us10y.value - us2y.value\n            FROM macro_series us10y\n            JOIN macro_series us2y\n              ON us2y.observed_at = us10y.observed_at\n            WHERE us10y.source = 'fred'\n              AND us2y.source = 'fred'\n              AND us10y.symbol = 'US10Y'\n              AND us2y.symbol = 'US2Y'\n            ORDER BY us10y.observed_at DESC\n            LIMIT 1\n        ) AS spread_10y_2y,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'WTI' ORDER BY observed_at DESC LIMIT 1) AS wti,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'BRENT' ORDER BY observed_at DESC LIMIT 1) AS brent,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'SP500' ORDER BY observed_at DESC LIMIT 1) AS sp500_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'SP500'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'SP500'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS sp500_30d,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ' ORDER BY observed_at DESC LIMIT 1) AS nasdaq_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'NASDAQ'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS nasdaq_30d\n),\nmetrics AS (\n    SELECT\n        *,\n        CASE WHEN sp500_30d IS NOT NULL AND sp500_30d <> 0\n             THEN ((sp500_latest / sp500_30d) - 1.0) * 100.0 END AS sp500_perf_30d,\n        CASE WHEN nasdaq_30d IS NOT NULL AND nasdaq_30d <> 0\n             THEN ((nasdaq_latest / nasdaq_30d) - 1.0) * 100.0 END AS nasdaq_perf_30d\n    FROM latest\n)\nSELECT 1 AS \"Ordre\", 'VIX >= 20' AS \"Règle\",\n       CASE WHEN vix IS NULL THEN 'N/D' ELSE printf('%.2f', vix) END AS \"Valeur\",\n       CASE WHEN vix >= 20 THEN -1 ELSE 0 END AS \"Impact\"\nFROM metrics\nUNION ALL\nSELECT 2, 'VIX >= 30',\n       CASE WHEN vix IS NULL THEN 'N/D' ELSE printf('%.2f', vix) END,\n       CASE WHEN vix >= 30 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 3, 'USD_BROAD >= 122',\n       CASE WHEN usd_broad IS NULL THEN 'N/D' ELSE printf('%.2f', usd_broad) END,\n       CASE WHEN usd_broad >= 122 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 4, 'US10Y >= 5',\n       CASE WHEN us10y IS NULL THEN 'N/D' ELSE printf('%.2f %%', us10y) END,\n       CASE WHEN us10y >= 5 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 5, 'Spread 10Y-2Y < 0',\n       CASE WHEN spread_10y_2y IS NULL THEN 'N/D' ELSE printf('%.3f %%', spread_10y_2y) END,\n       CASE WHEN spread_10y_2y < 0 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 6, 'WTI ou Brent >= 90',\n       CASE WHEN wti IS NULL AND brent IS NULL THEN 'N/D'\n            ELSE printf('WTI %.2f / Brent %.2f', wti, brent) END,\n       CASE WHEN wti >= 90 OR brent >= 90 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 7, 'Performance SP500 sur 30j < 0',\n       CASE WHEN sp500_perf_30d IS NULL THEN 'N/D' ELSE printf('%.2f %%', sp500_perf_30d) END,\n       CASE WHEN sp500_perf_30d < 0 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 8, 'Performance NASDAQ sur 30j < 0',\n       CASE WHEN nasdaq_perf_30d IS NULL THEN 'N/D' ELSE printf('%.2f %%', nasdaq_perf_30d) END,\n       CASE WHEN nasdaq_perf_30d < 0 THEN -1 ELSE 0 END\nFROM metrics\nORDER BY \"Ordre\";",
+          "queryText": "SELECT\n    datetime(observed_at) AS time,\n    value\nFROM macro_series\nWHERE symbol = 'MARKET_REGIME_STATE'\nORDER BY observed_at;",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    datetime(observed_at) AS time,\n    value\nFROM macro_series\nWHERE symbol = 'MARKET_REGIME_STATE'\nORDER BY observed_at;",
           "refId": "A",
           "timeColumns": [
             "time",
@@ -285,21 +603,449 @@
           ]
         }
       ],
-      "title": "Détails du score macro",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Ordre": true
-            },
-            "includeByName": {},
-            "indexByName": {},
-            "renameByName": {}
+      "title": "Crypto Market Regime",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-red",
+                "value": 0
+              },
+              {
+                "color": "dark-orange",
+                "value": -2
+              },
+              {
+                "color": "text",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "dark-green",
+                "value": 3
+              }
+            ]
           }
         }
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 5,
+        "x": 6,
+        "y": 9
+      },
+      "id": 36,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    datetime(observed_at) AS time,\n    value\nFROM macro_series\nWHERE symbol = 'MARKET_REGIME_SCORE'\nORDER BY observed_at;",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    datetime(observed_at) AS time,\n    value\nFROM macro_series\nWHERE symbol = 'MARKET_REGIME_SCORE'\nORDER BY observed_at;",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
       ],
-      "type": "table"
+      "title": "Market Regime Score",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 45
+              },
+              {
+                "color": "red",
+                "value": 55
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 4,
+        "x": 0,
+        "y": 12
+      },
+      "id": 31,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol = 'BTC_DOM'\nORDER BY observed_at;",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol = 'BTC_DOM'\nORDER BY observed_at;",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "BTC Dominance (%)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 45
+              },
+              {
+                "color": "red",
+                "value": 55
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 4,
+        "x": 4,
+        "y": 12
+      },
+      "id": 32,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol = 'STABLECOIN_DOM'\nORDER BY observed_at;",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol = 'STABLECOIN_DOM'\nORDER BY observed_at;",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Stablecoin Dominance (%)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "description": "Ethereum / Bitcoin price ratio.\n\nA rising ratio generally indicates that Ethereum is outperforming Bitcoin,\noften during periods of increasing risk appetite.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": true,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 7,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue",
+                "value": 0
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 16,
+        "x": 8,
+        "y": 12
+      },
+      "id": 33,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol = 'ETH_BTC'\nORDER BY observed_at;",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol = 'ETH_BTC'\nORDER BY observed_at;",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "ETH / BTC",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "description": "Total crypto market capitalization excluding Bitcoin and Ethereum.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "id": 34,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol = 'TOTAL3'\nORDER BY observed_at;",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    value\nFROM macro_series\nWHERE symbol = 'TOTAL3'\nORDER BY observed_at;",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Altcoin Market Cap (TOTAL3)",
+      "type": "timeseries"
     },
     {
       "collapsed": true,
@@ -307,51 +1053,106 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 29
       },
-      "id": 32,
+      "id": 46,
       "panels": [
         {
           "datasource": {
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
+          "description": "Synthèse pédagogique du contexte macro. 0 à -1 : contexte respirable ; -2 à -3 : prudence ; <= -4 : risk-off marqué. Ce score ne déclenche aucun trade.",
           "fieldConfig": {
             "defaults": {
-              "decimals": 2,
-              "max": 100,
-              "min": 0,
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "-1": {
+                      "color": "green",
+                      "index": 1,
+                      "text": "Contexte respirable"
+                    },
+                    "-2": {
+                      "color": "orange",
+                      "index": 2,
+                      "text": "Prudence"
+                    },
+                    "-3": {
+                      "color": "orange",
+                      "index": 3,
+                      "text": "Prudence"
+                    },
+                    "-4": {
+                      "color": "red",
+                      "index": 4,
+                      "text": "Risk-off marqué"
+                    },
+                    "-5": {
+                      "color": "red",
+                      "index": 5,
+                      "text": "Risk-off marqué"
+                    },
+                    "-6": {
+                      "color": "red",
+                      "index": 6,
+                      "text": "Risk-off marqué"
+                    },
+                    "-7": {
+                      "color": "red",
+                      "index": 7,
+                      "text": "Risk-off marqué"
+                    },
+                    "-8": {
+                      "color": "red",
+                      "index": 8,
+                      "text": "Risk-off marqué"
+                    },
+                    "0": {
+                      "color": "green",
+                      "index": 0,
+                      "text": "Contexte respirable"
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "max": 0,
+              "min": -8,
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
+                    "color": "red",
                     "value": 0
                   },
                   {
                     "color": "orange",
-                    "value": 3
+                    "value": -3
                   },
                   {
-                    "color": "red",
-                    "value": 5
+                    "color": "green",
+                    "value": -1
                   }
                 ]
-              },
-              "unit": "percent"
+              }
             }
           },
           "gridPos": {
-            "h": 8,
-            "w": 12,
+            "h": 10,
+            "w": 8,
             "x": 0,
-            "y": 12
+            "y": 30
           },
-          "id": 1,
+          "id": 29,
           "options": {
-            "colorMode": "value",
+            "colorMode": "background_solid",
             "graphMode": "none",
-            "justifyMode": "auto",
+            "justifyMode": "center",
             "orientation": "auto",
             "percentChangeColorMode": "standard",
             "reduceOptions": {
@@ -362,7 +1163,7 @@
               "values": false
             },
             "showPercentChange": false,
-            "textMode": "auto",
+            "textMode": "value_and_name",
             "wideLayout": true
           },
           "pluginVersion": "13.0.2",
@@ -373,11 +1174,11 @@
                 "uid": "macro-sqlite"
               },
               "format": "table",
-              "queryText": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
+              "queryText": "WITH latest AS (\n    SELECT\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'VIX' ORDER BY observed_at DESC LIMIT 1) AS vix,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'USD_BROAD' ORDER BY observed_at DESC LIMIT 1) AS usd_broad,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'US10Y' ORDER BY observed_at DESC LIMIT 1) AS us10y,\n        (\n            SELECT us10y.value - us2y.value\n            FROM macro_series us10y\n            JOIN macro_series us2y\n              ON us2y.observed_at = us10y.observed_at\n            WHERE us10y.source = 'fred'\n              AND us2y.source = 'fred'\n              AND us10y.symbol = 'US10Y'\n              AND us2y.symbol = 'US2Y'\n            ORDER BY us10y.observed_at DESC\n            LIMIT 1\n        ) AS spread_10y_2y,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'WTI' ORDER BY observed_at DESC LIMIT 1) AS wti,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'BRENT' ORDER BY observed_at DESC LIMIT 1) AS brent,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'SP500' ORDER BY observed_at DESC LIMIT 1) AS sp500_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'SP500'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'SP500'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS sp500_30d,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ' ORDER BY observed_at DESC LIMIT 1) AS nasdaq_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'NASDAQ'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS nasdaq_30d\n)\nSELECT\n    (CASE WHEN vix >= 20 THEN -1 ELSE 0 END)\n  + (CASE WHEN vix >= 30 THEN -1 ELSE 0 END)\n  + (CASE WHEN usd_broad >= 122 THEN -1 ELSE 0 END)\n  + (CASE WHEN us10y >= 5 THEN -1 ELSE 0 END)\n  + (CASE WHEN spread_10y_2y < 0 THEN -1 ELSE 0 END)\n  + (CASE WHEN wti >= 90 OR brent >= 90 THEN -1 ELSE 0 END)\n  + (CASE WHEN sp500_30d IS NOT NULL AND sp500_latest < sp500_30d THEN -1 ELSE 0 END)\n  + (CASE WHEN nasdaq_30d IS NOT NULL AND nasdaq_latest < nasdaq_30d THEN -1 ELSE 0 END)\n    AS \"Score macro\"\nFROM latest;",
               "queryType": "raw",
               "rawQuery": true,
-              "rawQueryText": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
-              "rawSql": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
+              "rawQueryText": "WITH latest AS (\n    SELECT\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'VIX' ORDER BY observed_at DESC LIMIT 1) AS vix,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'USD_BROAD' ORDER BY observed_at DESC LIMIT 1) AS usd_broad,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'US10Y' ORDER BY observed_at DESC LIMIT 1) AS us10y,\n        (\n            SELECT us10y.value - us2y.value\n            FROM macro_series us10y\n            JOIN macro_series us2y\n              ON us2y.observed_at = us10y.observed_at\n            WHERE us10y.source = 'fred'\n              AND us2y.source = 'fred'\n              AND us10y.symbol = 'US10Y'\n              AND us2y.symbol = 'US2Y'\n            ORDER BY us10y.observed_at DESC\n            LIMIT 1\n        ) AS spread_10y_2y,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'WTI' ORDER BY observed_at DESC LIMIT 1) AS wti,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'BRENT' ORDER BY observed_at DESC LIMIT 1) AS brent,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'SP500' ORDER BY observed_at DESC LIMIT 1) AS sp500_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'SP500'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'SP500'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS sp500_30d,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ' ORDER BY observed_at DESC LIMIT 1) AS nasdaq_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'NASDAQ'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS nasdaq_30d\n)\nSELECT\n    (CASE WHEN vix >= 20 THEN -1 ELSE 0 END)\n  + (CASE WHEN vix >= 30 THEN -1 ELSE 0 END)\n  + (CASE WHEN usd_broad >= 122 THEN -1 ELSE 0 END)\n  + (CASE WHEN us10y >= 5 THEN -1 ELSE 0 END)\n  + (CASE WHEN spread_10y_2y < 0 THEN -1 ELSE 0 END)\n  + (CASE WHEN wti >= 90 OR brent >= 90 THEN -1 ELSE 0 END)\n  + (CASE WHEN sp500_30d IS NOT NULL AND sp500_latest < sp500_30d THEN -1 ELSE 0 END)\n  + (CASE WHEN nasdaq_30d IS NOT NULL AND nasdaq_latest < nasdaq_30d THEN -1 ELSE 0 END)\n    AS \"Score macro\"\nFROM latest;",
+              "rawSql": "WITH latest AS (\n    SELECT\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'VIX' ORDER BY observed_at DESC LIMIT 1) AS vix,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'USD_BROAD' ORDER BY observed_at DESC LIMIT 1) AS usd_broad,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'US10Y' ORDER BY observed_at DESC LIMIT 1) AS us10y,\n        (\n            SELECT us10y.value - us2y.value\n            FROM macro_series us10y\n            JOIN macro_series us2y\n              ON us2y.observed_at = us10y.observed_at\n            WHERE us10y.source = 'fred'\n              AND us2y.source = 'fred'\n              AND us10y.symbol = 'US10Y'\n              AND us2y.symbol = 'US2Y'\n            ORDER BY us10y.observed_at DESC\n            LIMIT 1\n        ) AS spread_10y_2y,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'WTI' ORDER BY observed_at DESC LIMIT 1) AS wti,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'BRENT' ORDER BY observed_at DESC LIMIT 1) AS brent,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'SP500' ORDER BY observed_at DESC LIMIT 1) AS sp500_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'SP500'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'SP500'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS sp500_30d,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ' ORDER BY observed_at DESC LIMIT 1) AS nasdaq_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'NASDAQ'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS nasdaq_30d\n)\nSELECT\n    (CASE WHEN vix >= 20 THEN -1 ELSE 0 END)\n  + (CASE WHEN vix >= 30 THEN -1 ELSE 0 END)\n  + (CASE WHEN usd_broad >= 122 THEN -1 ELSE 0 END)\n  + (CASE WHEN us10y >= 5 THEN -1 ELSE 0 END)\n  + (CASE WHEN spread_10y_2y < 0 THEN -1 ELSE 0 END)\n  + (CASE WHEN wti >= 90 OR brent >= 90 THEN -1 ELSE 0 END)\n  + (CASE WHEN sp500_30d IS NOT NULL AND sp500_latest < sp500_30d THEN -1 ELSE 0 END)\n  + (CASE WHEN nasdaq_30d IS NOT NULL AND nasdaq_latest < nasdaq_30d THEN -1 ELSE 0 END)\n    AS \"Score macro\"\nFROM latest;",
               "refId": "A",
               "timeColumns": [
                 "time",
@@ -385,7 +1186,7 @@
               ]
             }
           ],
-          "title": "Dernier FEDFUNDS",
+          "title": "Score macro risk-on/off",
           "type": "stat"
         },
         {
@@ -393,81 +1194,99 @@
             "type": "frser-sqlite-datasource",
             "uid": "macro-sqlite"
           },
+          "description": "Détail des huit règles composant le score macro v1. Un impact de -1 indique qu'une règle de prudence est active.",
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
               "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "Taux (%)",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
                 },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 2,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
+                "footer": {
+                  "reducers": []
                 },
-                "showPoints": "auto",
-                "showValues": false,
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
+                "inspect": false
               },
-              "decimals": 2,
+              "mappings": [
+                {
+                  "options": {
+                    "-1": {
+                      "color": "red",
+                      "index": 1,
+                      "text": "Active"
+                    },
+                    "0": {
+                      "color": "green",
+                      "index": 0,
+                      "text": "Inactive"
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
                     "color": "green",
                     "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 0
                   }
                 ]
-              },
-              "unit": "percent"
-            }
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Impact"
+                },
+                "properties": [
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-text"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "red",
+                          "value": 0
+                        },
+                        {
+                          "color": "green",
+                          "value": 0
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 12
+            "h": 10,
+            "w": 16,
+            "x": 8,
+            "y": 30
           },
-          "id": 3,
+          "id": 30,
           "options": {
-            "annotations": {
-              "clustering": -1,
-              "multiLane": false
-            },
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
+            "cellHeight": "sm",
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "Ordre"
+              }
+            ]
           },
           "pluginVersion": "13.0.2",
           "targets": [
@@ -476,12 +1295,12 @@
                 "type": "frser-sqlite-datasource",
                 "uid": "macro-sqlite"
               },
-              "format": "time_series",
-              "queryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
+              "format": "table",
+              "queryText": "WITH latest AS (\n    SELECT\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'VIX' ORDER BY observed_at DESC LIMIT 1) AS vix,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'USD_BROAD' ORDER BY observed_at DESC LIMIT 1) AS usd_broad,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'US10Y' ORDER BY observed_at DESC LIMIT 1) AS us10y,\n        (\n            SELECT us10y.value - us2y.value\n            FROM macro_series us10y\n            JOIN macro_series us2y\n              ON us2y.observed_at = us10y.observed_at\n            WHERE us10y.source = 'fred'\n              AND us2y.source = 'fred'\n              AND us10y.symbol = 'US10Y'\n              AND us2y.symbol = 'US2Y'\n            ORDER BY us10y.observed_at DESC\n            LIMIT 1\n        ) AS spread_10y_2y,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'WTI' ORDER BY observed_at DESC LIMIT 1) AS wti,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'BRENT' ORDER BY observed_at DESC LIMIT 1) AS brent,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'SP500' ORDER BY observed_at DESC LIMIT 1) AS sp500_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'SP500'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'SP500'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS sp500_30d,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ' ORDER BY observed_at DESC LIMIT 1) AS nasdaq_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'NASDAQ'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS nasdaq_30d\n),\nmetrics AS (\n    SELECT\n        *,\n        CASE WHEN sp500_30d IS NOT NULL AND sp500_30d <> 0\n             THEN ((sp500_latest / sp500_30d) - 1.0) * 100.0 END AS sp500_perf_30d,\n        CASE WHEN nasdaq_30d IS NOT NULL AND nasdaq_30d <> 0\n             THEN ((nasdaq_latest / nasdaq_30d) - 1.0) * 100.0 END AS nasdaq_perf_30d\n    FROM latest\n)\nSELECT 1 AS \"Ordre\", 'VIX >= 20' AS \"Règle\",\n       CASE WHEN vix IS NULL THEN 'N/D' ELSE printf('%.2f', vix) END AS \"Valeur\",\n       CASE WHEN vix >= 20 THEN -1 ELSE 0 END AS \"Impact\"\nFROM metrics\nUNION ALL\nSELECT 2, 'VIX >= 30',\n       CASE WHEN vix IS NULL THEN 'N/D' ELSE printf('%.2f', vix) END,\n       CASE WHEN vix >= 30 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 3, 'USD_BROAD >= 122',\n       CASE WHEN usd_broad IS NULL THEN 'N/D' ELSE printf('%.2f', usd_broad) END,\n       CASE WHEN usd_broad >= 122 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 4, 'US10Y >= 5',\n       CASE WHEN us10y IS NULL THEN 'N/D' ELSE printf('%.2f %%', us10y) END,\n       CASE WHEN us10y >= 5 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 5, 'Spread 10Y-2Y < 0',\n       CASE WHEN spread_10y_2y IS NULL THEN 'N/D' ELSE printf('%.3f %%', spread_10y_2y) END,\n       CASE WHEN spread_10y_2y < 0 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 6, 'WTI ou Brent >= 90',\n       CASE WHEN wti IS NULL AND brent IS NULL THEN 'N/D'\n            ELSE printf('WTI %.2f / Brent %.2f', wti, brent) END,\n       CASE WHEN wti >= 90 OR brent >= 90 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 7, 'Performance SP500 sur 30j < 0',\n       CASE WHEN sp500_perf_30d IS NULL THEN 'N/D' ELSE printf('%.2f %%', sp500_perf_30d) END,\n       CASE WHEN sp500_perf_30d < 0 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 8, 'Performance NASDAQ sur 30j < 0',\n       CASE WHEN nasdaq_perf_30d IS NULL THEN 'N/D' ELSE printf('%.2f %%', nasdaq_perf_30d) END,\n       CASE WHEN nasdaq_perf_30d < 0 THEN -1 ELSE 0 END\nFROM metrics\nORDER BY \"Ordre\";",
               "queryType": "raw",
               "rawQuery": true,
-              "rawQueryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
-              "rawSql": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
+              "rawQueryText": "WITH latest AS (\n    SELECT\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'VIX' ORDER BY observed_at DESC LIMIT 1) AS vix,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'USD_BROAD' ORDER BY observed_at DESC LIMIT 1) AS usd_broad,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'US10Y' ORDER BY observed_at DESC LIMIT 1) AS us10y,\n        (\n            SELECT us10y.value - us2y.value\n            FROM macro_series us10y\n            JOIN macro_series us2y\n              ON us2y.observed_at = us10y.observed_at\n            WHERE us10y.source = 'fred'\n              AND us2y.source = 'fred'\n              AND us10y.symbol = 'US10Y'\n              AND us2y.symbol = 'US2Y'\n            ORDER BY us10y.observed_at DESC\n            LIMIT 1\n        ) AS spread_10y_2y,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'WTI' ORDER BY observed_at DESC LIMIT 1) AS wti,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'BRENT' ORDER BY observed_at DESC LIMIT 1) AS brent,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'SP500' ORDER BY observed_at DESC LIMIT 1) AS sp500_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'SP500'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'SP500'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS sp500_30d,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ' ORDER BY observed_at DESC LIMIT 1) AS nasdaq_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'NASDAQ'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS nasdaq_30d\n),\nmetrics AS (\n    SELECT\n        *,\n        CASE WHEN sp500_30d IS NOT NULL AND sp500_30d <> 0\n             THEN ((sp500_latest / sp500_30d) - 1.0) * 100.0 END AS sp500_perf_30d,\n        CASE WHEN nasdaq_30d IS NOT NULL AND nasdaq_30d <> 0\n             THEN ((nasdaq_latest / nasdaq_30d) - 1.0) * 100.0 END AS nasdaq_perf_30d\n    FROM latest\n)\nSELECT 1 AS \"Ordre\", 'VIX >= 20' AS \"Règle\",\n       CASE WHEN vix IS NULL THEN 'N/D' ELSE printf('%.2f', vix) END AS \"Valeur\",\n       CASE WHEN vix >= 20 THEN -1 ELSE 0 END AS \"Impact\"\nFROM metrics\nUNION ALL\nSELECT 2, 'VIX >= 30',\n       CASE WHEN vix IS NULL THEN 'N/D' ELSE printf('%.2f', vix) END,\n       CASE WHEN vix >= 30 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 3, 'USD_BROAD >= 122',\n       CASE WHEN usd_broad IS NULL THEN 'N/D' ELSE printf('%.2f', usd_broad) END,\n       CASE WHEN usd_broad >= 122 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 4, 'US10Y >= 5',\n       CASE WHEN us10y IS NULL THEN 'N/D' ELSE printf('%.2f %%', us10y) END,\n       CASE WHEN us10y >= 5 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 5, 'Spread 10Y-2Y < 0',\n       CASE WHEN spread_10y_2y IS NULL THEN 'N/D' ELSE printf('%.3f %%', spread_10y_2y) END,\n       CASE WHEN spread_10y_2y < 0 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 6, 'WTI ou Brent >= 90',\n       CASE WHEN wti IS NULL AND brent IS NULL THEN 'N/D'\n            ELSE printf('WTI %.2f / Brent %.2f', wti, brent) END,\n       CASE WHEN wti >= 90 OR brent >= 90 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 7, 'Performance SP500 sur 30j < 0',\n       CASE WHEN sp500_perf_30d IS NULL THEN 'N/D' ELSE printf('%.2f %%', sp500_perf_30d) END,\n       CASE WHEN sp500_perf_30d < 0 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 8, 'Performance NASDAQ sur 30j < 0',\n       CASE WHEN nasdaq_perf_30d IS NULL THEN 'N/D' ELSE printf('%.2f %%', nasdaq_perf_30d) END,\n       CASE WHEN nasdaq_perf_30d < 0 THEN -1 ELSE 0 END\nFROM metrics\nORDER BY \"Ordre\";",
+              "rawSql": "WITH latest AS (\n    SELECT\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'VIX' ORDER BY observed_at DESC LIMIT 1) AS vix,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'USD_BROAD' ORDER BY observed_at DESC LIMIT 1) AS usd_broad,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'US10Y' ORDER BY observed_at DESC LIMIT 1) AS us10y,\n        (\n            SELECT us10y.value - us2y.value\n            FROM macro_series us10y\n            JOIN macro_series us2y\n              ON us2y.observed_at = us10y.observed_at\n            WHERE us10y.source = 'fred'\n              AND us2y.source = 'fred'\n              AND us10y.symbol = 'US10Y'\n              AND us2y.symbol = 'US2Y'\n            ORDER BY us10y.observed_at DESC\n            LIMIT 1\n        ) AS spread_10y_2y,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'WTI' ORDER BY observed_at DESC LIMIT 1) AS wti,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'BRENT' ORDER BY observed_at DESC LIMIT 1) AS brent,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'SP500' ORDER BY observed_at DESC LIMIT 1) AS sp500_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'SP500'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'SP500'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS sp500_30d,\n        (SELECT value FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ' ORDER BY observed_at DESC LIMIT 1) AS nasdaq_latest,\n        (\n            SELECT value\n            FROM macro_series\n            WHERE source = 'fred'\n              AND symbol = 'NASDAQ'\n              AND observed_at <= date(\n                  (SELECT MAX(observed_at) FROM macro_series WHERE source = 'fred' AND symbol = 'NASDAQ'),\n                  '-30 days'\n              )\n            ORDER BY observed_at DESC\n            LIMIT 1\n        ) AS nasdaq_30d\n),\nmetrics AS (\n    SELECT\n        *,\n        CASE WHEN sp500_30d IS NOT NULL AND sp500_30d <> 0\n             THEN ((sp500_latest / sp500_30d) - 1.0) * 100.0 END AS sp500_perf_30d,\n        CASE WHEN nasdaq_30d IS NOT NULL AND nasdaq_30d <> 0\n             THEN ((nasdaq_latest / nasdaq_30d) - 1.0) * 100.0 END AS nasdaq_perf_30d\n    FROM latest\n)\nSELECT 1 AS \"Ordre\", 'VIX >= 20' AS \"Règle\",\n       CASE WHEN vix IS NULL THEN 'N/D' ELSE printf('%.2f', vix) END AS \"Valeur\",\n       CASE WHEN vix >= 20 THEN -1 ELSE 0 END AS \"Impact\"\nFROM metrics\nUNION ALL\nSELECT 2, 'VIX >= 30',\n       CASE WHEN vix IS NULL THEN 'N/D' ELSE printf('%.2f', vix) END,\n       CASE WHEN vix >= 30 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 3, 'USD_BROAD >= 122',\n       CASE WHEN usd_broad IS NULL THEN 'N/D' ELSE printf('%.2f', usd_broad) END,\n       CASE WHEN usd_broad >= 122 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 4, 'US10Y >= 5',\n       CASE WHEN us10y IS NULL THEN 'N/D' ELSE printf('%.2f %%', us10y) END,\n       CASE WHEN us10y >= 5 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 5, 'Spread 10Y-2Y < 0',\n       CASE WHEN spread_10y_2y IS NULL THEN 'N/D' ELSE printf('%.3f %%', spread_10y_2y) END,\n       CASE WHEN spread_10y_2y < 0 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 6, 'WTI ou Brent >= 90',\n       CASE WHEN wti IS NULL AND brent IS NULL THEN 'N/D'\n            ELSE printf('WTI %.2f / Brent %.2f', wti, brent) END,\n       CASE WHEN wti >= 90 OR brent >= 90 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 7, 'Performance SP500 sur 30j < 0',\n       CASE WHEN sp500_perf_30d IS NULL THEN 'N/D' ELSE printf('%.2f %%', sp500_perf_30d) END,\n       CASE WHEN sp500_perf_30d < 0 THEN -1 ELSE 0 END\nFROM metrics\nUNION ALL\nSELECT 8, 'Performance NASDAQ sur 30j < 0',\n       CASE WHEN nasdaq_perf_30d IS NULL THEN 'N/D' ELSE printf('%.2f %%', nasdaq_perf_30d) END,\n       CASE WHEN nasdaq_perf_30d < 0 THEN -1 ELSE 0 END\nFROM metrics\nORDER BY \"Ordre\";",
               "refId": "A",
               "timeColumns": [
                 "time",
@@ -489,566 +1308,770 @@
               ]
             }
           ],
-          "timeFrom": "5y",
-          "title": "FEDFUNDS — Federal Funds Effective Rate",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "percent"
-            }
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 12,
-            "x": 0,
-            "y": 20
-          },
-          "id": 9,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": true
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "13.0.2",
-          "targets": [
+          "title": "Détails du score macro",
+          "transformations": [
             {
-              "datasource": {
-                "type": "frser-sqlite-datasource",
-                "uid": "macro-sqlite"
-              },
-              "queryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('US2Y', 'US10Y', 'US30Y')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'US2Y' THEN m.value END) AS US2Y,\n    MAX(CASE WHEN m.symbol = 'US10Y' THEN m.value END) AS US10Y,\n    MAX(CASE WHEN m.symbol = 'US30Y' THEN m.value END) AS US30Y\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('US2Y', 'US10Y', 'US30Y')",
-              "queryType": "table",
-              "rawQueryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('US2Y', 'US10Y', 'US30Y')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'US2Y' THEN m.value END) AS US2Y,\n    MAX(CASE WHEN m.symbol = 'US10Y' THEN m.value END) AS US10Y,\n    MAX(CASE WHEN m.symbol = 'US30Y' THEN m.value END) AS US30Y\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('US2Y', 'US10Y', 'US30Y')",
-              "refId": "A",
-              "timeColumns": [
-                "time",
-                "ts"
-              ]
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Ordre": true
+                },
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {}
+              }
             }
           ],
-          "title": "Derniers rendements US",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "showValues": false,
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "percent"
-            }
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 12,
-            "x": 12,
-            "y": 20
-          },
-          "id": 8,
-          "options": {
-            "annotations": {
-              "clustering": -1,
-              "multiLane": false
-            },
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "13.0.2",
-          "targets": [
-            {
-              "datasource": {
-                "type": "frser-sqlite-datasource",
-                "uid": "macro-sqlite"
-              },
-              "queryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'US2Y' THEN value END) AS US2Y,\n    MAX(CASE WHEN symbol = 'US10Y' THEN value END) AS US10Y,\n    MAX(CASE WHEN symbol = 'US30Y' THEN value END) AS US30Y\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('US2Y', 'US10Y', 'US30Y')\nGROUP BY observed_at\nORDER BY observed_at ASC",
-              "queryType": "table",
-              "rawQueryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'US2Y' THEN value END) AS US2Y,\n    MAX(CASE WHEN symbol = 'US10Y' THEN value END) AS US10Y,\n    MAX(CASE WHEN symbol = 'US30Y' THEN value END) AS US30Y\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('US2Y', 'US10Y', 'US30Y')\nGROUP BY observed_at\nORDER BY observed_at ASC",
-              "refId": "A",
-              "timeColumns": [
-                "time",
-                "ts"
-              ]
-            }
-          ],
-          "timeFrom": "5y",
-          "title": "US Treasury Yields — FRED",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "fixedColor": "text",
-                "mode": "fixed"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "showValues": false,
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "line+area"
-                }
-              },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "red",
-                    "value": 0
-                  },
-                  {
-                    "color": "orange",
-                    "value": 0
-                  },
-                  {
-                    "color": "green",
-                    "value": 0.5
-                  }
-                ]
-              },
-              "unit": "percent"
-            }
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 12,
-            "x": 0,
-            "y": 27
-          },
-          "id": 10,
-          "options": {
-            "annotations": {
-              "clustering": -1,
-              "multiLane": false
-            },
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "13.0.2",
-          "targets": [
-            {
-              "datasource": {
-                "type": "frser-sqlite-datasource",
-                "uid": "macro-sqlite"
-              },
-              "queryText": "SELECT\n    us10y.observed_at AS time,\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at ASC",
-              "queryType": "table",
-              "rawQueryText": "SELECT\n    us10y.observed_at AS time,\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at ASC",
-              "refId": "A",
-              "timeColumns": [
-                "time",
-                "ts"
-              ]
-            }
-          ],
-          "timeFrom": "5y",
-          "title": "US 10Y - 2Y Yield Spread — FRED",
-          "transparent": true,
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "thresholds": {
-                "mode": "percentage",
-                "steps": [
-                  {
-                    "color": "red",
-                    "value": 0
-                  },
-                  {
-                    "color": "orange",
-                    "value": 0
-                  },
-                  {
-                    "color": "green",
-                    "value": 0.5
-                  }
-                ]
-              },
-              "unit": "percent"
-            }
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 11,
-            "x": 13,
-            "y": 27
-          },
-          "id": 11,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "13.0.2",
-          "targets": [
-            {
-              "datasource": {
-                "type": "frser-sqlite-datasource",
-                "uid": "macro-sqlite"
-              },
-              "queryText": "SELECT\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at DESC\nLIMIT 1\n",
-              "queryType": "table",
-              "rawQueryText": "SELECT\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at DESC\nLIMIT 1\n",
-              "refId": "A",
-              "timeColumns": [
-                "time",
-                "ts"
-              ]
-            }
-          ],
-          "title": "Dernier spread 10Y-2Y",
-          "type": "stat"
+          "type": "table"
         }
       ],
+      "title": "Macro Score",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "id": 47,
       "title": "Main",
       "type": "row"
     },
     {
-      "collapsed": true,
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 3
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "format": "table",
+          "queryText": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
+          "queryType": "raw",
+          "rawQuery": true,
+          "rawQueryText": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
+          "rawSql": "SELECT value FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at DESC LIMIT 1;",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Dernier FEDFUNDS",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Taux (%)",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "id": 3,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "format": "time_series",
+          "queryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
+          "queryType": "raw",
+          "rawQuery": true,
+          "rawQueryText": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
+          "rawSql": "SELECT CAST(strftime('%s', substr(observed_at, 1, 19)) AS INTEGER) AS time, value AS FEDFUNDS FROM macro_series WHERE symbol = 'FEDFUNDS' ORDER BY observed_at ASC;",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "5y",
+      "title": "FEDFUNDS — Federal Funds Effective Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 39
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('US2Y', 'US10Y', 'US30Y')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'US2Y' THEN m.value END) AS US2Y,\n    MAX(CASE WHEN m.symbol = 'US10Y' THEN m.value END) AS US10Y,\n    MAX(CASE WHEN m.symbol = 'US30Y' THEN m.value END) AS US30Y\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('US2Y', 'US10Y', 'US30Y')",
+          "queryType": "table",
+          "rawQueryText": "WITH latest_observations AS (\n    SELECT\n        symbol,\n        MAX(observed_at) AS latest_observed_at\n    FROM macro_series\n    WHERE source = 'fred'\n      AND symbol IN ('US2Y', 'US10Y', 'US30Y')\n    GROUP BY symbol\n)\nSELECT\n    MAX(CASE WHEN m.symbol = 'US2Y' THEN m.value END) AS US2Y,\n    MAX(CASE WHEN m.symbol = 'US10Y' THEN m.value END) AS US10Y,\n    MAX(CASE WHEN m.symbol = 'US30Y' THEN m.value END) AS US30Y\nFROM macro_series m\nJOIN latest_observations latest\n  ON latest.symbol = m.symbol\n AND latest.latest_observed_at = m.observed_at\nWHERE m.source = 'fred'\n  AND m.symbol IN ('US2Y', 'US10Y', 'US30Y')",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Derniers rendements US",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 39
+      },
+      "id": 8,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'US2Y' THEN value END) AS US2Y,\n    MAX(CASE WHEN symbol = 'US10Y' THEN value END) AS US10Y,\n    MAX(CASE WHEN symbol = 'US30Y' THEN value END) AS US30Y\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('US2Y', 'US10Y', 'US30Y')\nGROUP BY observed_at\nORDER BY observed_at ASC",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    MAX(CASE WHEN symbol = 'US2Y' THEN value END) AS US2Y,\n    MAX(CASE WHEN symbol = 'US10Y' THEN value END) AS US10Y,\n    MAX(CASE WHEN symbol = 'US30Y' THEN value END) AS US30Y\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol IN ('US2Y', 'US10Y', 'US30Y')\nGROUP BY observed_at\nORDER BY observed_at ASC",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "5y",
+      "title": "US Treasury Yields — FRED",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line+area"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 0.5
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 46
+      },
+      "id": 10,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    us10y.observed_at AS time,\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at ASC",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    us10y.observed_at AS time,\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at ASC",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "5y",
+      "title": "US 10Y - 2Y Yield Spread — FRED",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 0.5
+              }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 11,
+        "x": 13,
+        "y": 46
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at DESC\nLIMIT 1\n",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    us10y.value - us2y.value AS \"10Y-2Y Spread\"\nFROM macro_series us10y\nJOIN macro_series us2y\n  ON us2y.observed_at = us10y.observed_at\nWHERE us10y.source = 'fred'\n  AND us2y.source = 'fred'\n  AND us10y.symbol = 'US10Y'\n  AND us2y.symbol = 'US2Y'\nORDER BY us10y.observed_at DESC\nLIMIT 1\n",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Dernier spread 10Y-2Y",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 55
       },
-      "id": 33,
-      "panels": [
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 2,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            }
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 12,
-            "x": 0,
-            "y": 13
-          },
-          "id": 16,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": true
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "13.0.2",
-          "targets": [
-            {
-              "datasource": {
-                "type": "frser-sqlite-datasource",
-                "uid": "macro-sqlite"
-              },
-              "queryText": "SELECT\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at DESC\nLIMIT 1",
-              "queryType": "table",
-              "rawQueryText": "SELECT\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at DESC\nLIMIT 1",
-              "refId": "A",
-              "timeColumns": [
-                "time",
-                "ts"
-              ]
-            }
-          ],
-          "title": "Dernier dollar broad",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "frser-sqlite-datasource",
-            "uid": "macro-sqlite"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "showValues": false,
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "line"
-                }
-              },
-              "decimals": 2,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "orange",
-                    "value": 115
-                  },
-                  {
-                    "color": "red",
-                    "value": 122
-                  }
-                ]
-              }
-            }
-          },
-          "gridPos": {
-            "h": 9,
-            "w": 12,
-            "x": 12,
-            "y": 13
-          },
-          "id": 17,
-          "options": {
-            "annotations": {
-              "clustering": -1,
-              "multiLane": false
-            },
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "13.0.2",
-          "targets": [
-            {
-              "datasource": {
-                "type": "frser-sqlite-datasource",
-                "uid": "macro-sqlite"
-              },
-              "queryText": "SELECT\n    observed_at AS time,\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at ASC",
-              "queryType": "table",
-              "rawQueryText": "SELECT\n    observed_at AS time,\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at ASC",
-              "refId": "A",
-              "timeColumns": [
-                "time",
-                "ts"
-              ]
-            }
-          ],
-          "timeFrom": "5y",
-          "title": "U.S. Dollar Index — FRED",
-          "type": "timeseries"
-        }
-      ],
+      "id": 48,
       "title": "Dollar",
       "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 56
+      },
+      "id": 16,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at DESC\nLIMIT 1",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at DESC\nLIMIT 1",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "title": "Dernier dollar broad",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "macro-sqlite"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 115
+              },
+              {
+                "color": "red",
+                "value": 122
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 56
+      },
+      "id": 17,
+      "options": {
+        "annotations": {
+          "clustering": -1,
+          "multiLane": false
+        },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "13.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "macro-sqlite"
+          },
+          "queryText": "SELECT\n    observed_at AS time,\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at ASC",
+          "queryType": "table",
+          "rawQueryText": "SELECT\n    observed_at AS time,\n    value AS \"USD Broad\"\nFROM macro_series\nWHERE source = 'fred'\n  AND symbol = 'USD_BROAD'\nORDER BY observed_at ASC",
+          "refId": "A",
+          "timeColumns": [
+            "time",
+            "ts"
+          ]
+        }
+      ],
+      "timeFrom": "5y",
+      "title": "U.S. Dollar Index — FRED",
+      "type": "timeseries"
     },
     {
       "collapsed": true,
@@ -1056,9 +2079,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 65
       },
-      "id": 34,
+      "id": 49,
       "panels": [
         {
           "datasource": {
@@ -1091,7 +2114,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 14
+            "y": 66
           },
           "id": 12,
           "options": {
@@ -1200,7 +2223,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 14
+            "y": 66
           },
           "id": 13,
           "options": {
@@ -1251,9 +2274,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 66
       },
-      "id": 35,
+      "id": 50,
       "panels": [
         {
           "datasource": {
@@ -1286,7 +2309,7 @@
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 15
+            "y": 67
           },
           "id": 14,
           "options": {
@@ -1395,7 +2418,7 @@
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 15
+            "y": 67
           },
           "id": 15,
           "options": {
@@ -1446,9 +2469,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 67
       },
-      "id": 36,
+      "id": 51,
       "panels": [
         {
           "datasource": {
@@ -1539,7 +2562,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 16
+            "y": 68
           },
           "id": 18,
           "options": {
@@ -1647,7 +2670,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 16
+            "y": 68
           },
           "id": 19,
           "options": {
@@ -1752,7 +2775,7 @@
             "h": 9,
             "w": 8,
             "x": 16,
-            "y": 16
+            "y": 68
           },
           "id": 20,
           "options": {
@@ -1803,9 +2826,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 68
       },
-      "id": 37,
+      "id": 52,
       "panels": [
         {
           "datasource": {
@@ -1868,7 +2891,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 17
+            "y": 69
           },
           "id": 4,
           "options": {
@@ -1942,7 +2965,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 17
+            "y": 69
           },
           "id": 7,
           "options": {
@@ -2048,7 +3071,7 @@
             "h": 9,
             "w": 8,
             "x": 16,
-            "y": 17
+            "y": 69
           },
           "id": 2,
           "options": {
@@ -2101,9 +3124,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 69
       },
-      "id": 38,
+      "id": 53,
       "panels": [
         {
           "datasource": {
@@ -2141,7 +3164,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 18
+            "y": 70
           },
           "id": 5,
           "options": {
@@ -2207,7 +3230,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 18
+            "y": 70
           },
           "id": 6,
           "options": {

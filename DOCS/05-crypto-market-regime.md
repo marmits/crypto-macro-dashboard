@@ -1,484 +1,152 @@
 # Crypto Market Regime
 
-Version : 2.0
-Statut : En développement
-Projet : crypto-macro-dashboard
+Statut : Implémenté (V1) – Architecture stabilisée
 
----
+## Objectif
 
-# Objectif
+Le module **Crypto Market Regime** fournit une lecture synthétique de l'état du marché crypto à partir de données publiques. Il ne génère pas de signaux de trading mais un **contexte de marché** destiné à l'aide à la décision.
 
-Le module **Crypto Market Regime** complète le Macro Dashboard afin d'apporter une lecture globale du marché des cryptomonnaies.
+## Architecture finale
 
-Son objectif n'est pas de prédire le marché ni de générer des signaux d'achat ou de vente.
-
-Il fournit uniquement un contexte permettant d'interpréter plus facilement les signaux provenant de Freqtrade, Hyperliquid ou d'une analyse manuelle.
-
-Le principe reste identique au Macro Score :
-
-> Décrire le marché plutôt que le prédire.
-
----
-
-# Philosophie
-
-Le projet repose sur plusieurs principes.
-
-• simplicité
-
-• reproductibilité
-
-• sources publiques
-
-• peu d'APIs
-
-• aucune IA dans les calculs
-
-• aucune boîte noire
-
-• calculs compréhensibles
-
-• dashboard pédagogique
-
-Chaque indicateur doit pouvoir être expliqué en quelques lignes.
-
-Aucun indicateur ne doit produire directement un ordre d'achat ou de vente.
-
----
-
-# Architecture
-
-```
-                CoinGecko
-                     │
-                     │
-          collector/main.py
-                     │
-                     ▼
-              SQLite (macro.db)
-                     │
-                     ▼
-               Derived Metrics
-                     │
-                     ▼
-                  Grafana
-                     │
-                     ▼
-        Crypto Market Regime Dashboard
+```text
+CoinGecko
+    │
+    ▼
+collector/main.py
+    │
+    ▼
+Raw Metrics (macro_series)
+    │
+    ▼
+collector/derived.py
+    │
+    ▼
+Derived Metrics
+    │
+    ▼
+Trend Signals
+    │
+    ▼
+Market Regime Score
+    │
+    ▼
+Market Regime State
+    │
+    ▼
+Grafana Dashboard
 ```
 
-Le collector reste l'unique composant chargé de récupérer les données.
+## Philosophie
 
-Grafana ne réalise que :
+Le pipeline est volontairement découpé en couches indépendantes :
 
-- l'affichage
-- quelques calculs simples
-- les scores
-- les transformations visuelles
+1. **Raw Metrics** : données collectées sans interprétation.
+2. **Derived Metrics** : métriques calculées à partir des données brutes.
+3. **Signals** : évolution des métriques (+1 / 0 / -1).
+4. **Market Regime Score** : somme des signaux.
+5. **Market Regime State** : état de marché lisible.
+6. **Grafana** : visualisation uniquement.
 
----
+Grafana n'effectue pas les calculs métier.
 
-# Architecture technique
+## Raw Metrics
 
-Le module réutilise entièrement l'infrastructure existante.
+Exemples :
 
-Backend
+- BTC
+- ETH
+- TOTAL_MCAP
+- TOTAL_VOLUME
+- BTC_DOM
+- ETH_DOM
+- STABLECOIN_MCAP
 
-- Docker
-- Python
-- SQLite
-- CoinGecko
+## Derived Metrics
 
-Frontend
+- BTC_MCAP
+- ETH_MCAP
+- STABLECOIN_DOM
+- ETH_BTC
+- TOTAL3
 
-- Grafana
+## Signals
 
-Aucune nouvelle base de données n'est introduite.
+Chaque métrique dérivée (ou brute pertinente) est comparée à sa valeur précédente.
 
----
+- +1 : évolution favorable
+- 0 : stable
+- -1 : évolution défavorable
 
-# Sources de données
+Les signaux actuellement implémentés :
 
-Version actuelle
+- BTC_DOM_SIGNAL
+- STABLECOIN_SIGNAL
+- ETH_BTC_SIGNAL
+- TOTAL3_SIGNAL
 
-## CoinGecko
+## Score
 
-Les données crypto proviennent exclusivement de CoinGecko.
+Le score est la somme des quatre signaux.
 
-Le projet privilégie volontairement une API simple, gratuite et stable.
+Exemple :
 
-Les appels restent peu nombreux afin d'éviter toute limitation.
+| Signal | Valeur |
+|--------|------:|
+| BTC Dominance | +1 |
+| Stablecoin | -1 |
+| ETH/BTC | -1 |
+| TOTAL3 | +1 |
+| **Score** | **0** |
 
----
+## États de marché
 
-# Données collectées
+| Score | État |
+|------:|------|
+| ≤ -3 | Risk-Off |
+| -2 à -1 | Defensive |
+| 0 | Neutral |
+| 1 à 2 | Bullish |
+| ≥ 3 | Risk-On |
 
-Le collector récupère notamment :
+## Dashboard Grafana V1
 
-- Prix BTC
-- Prix ETH
-- Prix SOL
-- Prix HYPE
+Le dashboard actuel comprend :
 
-ainsi que les données globales :
+### Crypto Signals
 
-- Market Cap totale
-- Volume global
+- BTC Dominance Signal
+- Stablecoin Signal
+- ETH/BTC Signal
+- TOTAL3 Signal
+- Score Explanation
+
+### Crypto Market Regime
+
+- Market Regime
+- Market Regime Score
+
+### Séries
+
 - BTC Dominance
-- Market Cap BTC
-- Market Cap ETH
+- Stablecoin Dominance
+- ETH/BTC
+- TOTAL3
 
----
+## Principes
 
-# Derived Metrics
+- calculs reproductibles ;
+- aucune IA dans le scoring ;
+- aucune boîte noire ;
+- architecture modulaire ;
+- documentation synchronisée avec le code.
 
-Le Sprint 1 introduit les premières métriques dérivées.
+## Perspectives
 
-Ces métriques sont calculées lors de la collecte puis stockées dans SQLite.
+Les prochaines évolutions concerneront :
 
-Version actuelle :
+- amélioration des seuils ;
+- nouveaux indicateurs ;
+- alertes Discord ;
+- rapports quotidiens ;
+- calibration des signaux.
 
-## BTC_MCAP
-
-Capitalisation Bitcoin.
-
----
-
-## ETH_MCAP
-
-Capitalisation Ethereum.
-
----
-
-## TOTAL3
-
-Approximation de la capitalisation du marché des altcoins.
-
-Calcul :
-
-```
-TOTAL3 = TOTAL - BTC_MCAP - ETH_MCAP
-```
-
-Cette métrique évite d'interroger une API supplémentaire.
-
----
-
-# Base de données
-
-Toutes les données sont centralisées dans :
-
-```
-macro_series
-```
-
-Les données crypto et macro partagent volontairement la même table.
-
-Cette approche simplifie :
-
-- les requêtes SQL
-- Grafana
-- les sauvegardes
-- la maintenance
-
----
-
-# Dashboard
-
-Le module apparaîtra dans une nouvelle row Grafana.
-
-Nom :
-
-```
-Crypto Market Regime
-```
-
-Cette row viendra compléter les sections existantes du Macro Dashboard.
-
----
-
-# Version 1
-
-La première version utilisera les indicateurs suivants.
-
-## BTC Dominance
-
-Mesure la part de Bitcoin dans la capitalisation totale.
-
-Interprétation générale :
-
-Dominance en hausse :
-
-- Bitcoin plus fort que les altcoins.
-
-Dominance en baisse :
-
-- Rotation vers les altcoins.
-
----
-
-## Stablecoin Dominance
-
-Mesure la part des stablecoins.
-
-Interprétation :
-
-Hausse :
-
-- prudence
-- liquidités
-
-Baisse :
-
-- retour du capital sur les actifs risqués
-
----
-
-## ETH/BTC
-
-Permet de mesurer la force relative d'Ethereum.
-
-ETH/BTC en hausse :
-
-rotation vers les altcoins.
-
-ETH/BTC en baisse :
-
-Bitcoin domine le marché.
-
----
-
-## TOTAL3
-
-Mesure la croissance des altcoins.
-
-Une hausse de TOTAL3 indique généralement :
-
-- intérêt pour les altcoins
-- élargissement du marché
-
----
-
-## Global Volume
-
-Volume global du marché.
-
-Le volume permet d'évaluer la qualité d'un mouvement.
-
-Une hausse accompagnée d'une hausse des prix est généralement plus solide qu'une hausse sans volume.
-
----
-
-## BTC Trend
-
-Tendance du Bitcoin.
-
-Version initiale :
-
-moyennes mobiles simples.
-
-Des évolutions restent possibles.
-
----
-
-# Crypto Score
-
-Le Crypto Score synthétise plusieurs indicateurs.
-
-Son objectif est uniquement descriptif.
-
-Il ne produit jamais un signal d'achat.
-
-Version initiale :
-
-```
-0
-1
-2
-
-Bitcoin Season
-
-3
-
-Transition
-
-4
-5
-
-Altseason
-
-6
-```
-
-Les seuils pourront évoluer au fil du projet.
-
----
-
-# Crypto Weather
-
-Le Crypto Weather est une évolution du Crypto Score.
-
-Il vise à produire une lecture immédiatement compréhensible.
-
-Exemple :
-
-🟢 Bitcoin Season
-
-🟢 Altseason
-
-🟡 Transition
-
-🔴 Risk-off
-
-Le Crypto Weather expliquera également pourquoi ce régime est détecté.
-
-Exemple :
-
-```
-Bitcoin Season
-
-BTC Dominance ↑
-
-ETH/BTC ↓
-
-TOTAL3 ↓
-
-Volume ↑
-```
-
-L'objectif est de remplacer une lecture de plusieurs graphiques par une synthèse simple.
-
----
-
-# Crypto Regime Radar
-
-Version future.
-
-Le Regime Radar expliquera précisément :
-
-- les indicateurs actifs
-- leur poids
-- leur évolution
-
-Il constituera un panneau de diagnostic du marché.
-
----
-
-# Contraintes
-
-Le module doit respecter les règles suivantes.
-
-- réutiliser SQLite
-- réutiliser CoinGecko
-- éviter le scraping
-- éviter les APIs supplémentaires
-- conserver des calculs explicables
-- privilégier des requêtes SQL simples
-- limiter les dépendances
-
----
-
-# Validation
-
-Chaque nouvel indicateur devra être validé.
-
-Validation SQL
-
-- cohérence des valeurs
-
-Validation Grafana
-
-- affichage
-- unités
-- seuils
-- lisibilité
-
-Validation documentaire
-
-- Roadmap
-- Prompt actif
-- Documentation technique
-
----
-
-# Historique
-
-## Sprint 1
-
-Terminé.
-
-Réalisé :
-
-✓ Backend
-
-✓ SQLite
-
-✓ Collector FRED
-
-✓ Collector CoinGecko
-
-✓ Derived Metrics
-
-✓ BTC_MCAP
-
-✓ ETH_MCAP
-
-✓ TOTAL3
-
-✓ Validation SQL
-
----
-
-## Sprint 2
-
-En cours.
-
-Objectif :
-
-Construire le Dashboard Crypto Market Regime.
-
----
-
-# Vision long terme
-
-Le projet évolue progressivement selon les étapes suivantes.
-
-```
-Macro Dashboard
-
-↓
-
-Crypto Dashboard
-
-↓
-
-Crypto Score
-
-↓
-
-Crypto Weather
-
-↓
-
-Crypto Regime Radar
-
-↓
-
-Captain Cryptos
-
-↓
-
-Freqtrade
-
-↓
-
-Hyperliquid
-```
-
-Chaque étape apporte une couche supplémentaire d'analyse tout en conservant les principes fondamentaux du projet :
-
-- simplicité
-- robustesse
-- lisibilité
-- transparence
-- absence de signaux automatiques.
