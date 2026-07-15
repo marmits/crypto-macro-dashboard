@@ -247,18 +247,39 @@ Le score `MARKET_REGIME_SCORE` est la somme des signaux. L'état numérique
 Les valeurs de détail `<SYMBOL>_PREVIOUS` et `<SYMBOL>_CURRENT` sont aussi
 persistées pour expliquer les quatre contributions du score dans Grafana.
 
-### Vigilance prioritaire : comparaison temporelle
+#### Contrat temporel des signaux
 
-`load_previous_metrics()` sélectionne actuellement `ROW_NUMBER() = 1`, donc la
-valeur la plus récente et non la précédente. Après la collecte des données brutes,
-un signal comme `BTC_DOM_SIGNAL` risque de comparer la valeur courante à elle-même
-et de rester neutre. Les dérivés peuvent, eux, comparer avec le dernier run.
+Les signaux comparent les deux dernières observations distinctes de leur métrique
+source :
 
-Avant d'ajouter un indicateur au score, définir et tester le contrat temporel :
-prendre la dernière valeur strictement antérieure au snapshot courant, ou le
-snapshot complet précédent. Le choix doit être identique pour les signaux, les
-détails affichés et les tests. Une série insuffisante doit être explicitement
-« données insuffisantes », pas « neutre » par défaut.
+- `current` correspond à l'observation ayant le `observed_at` le plus récent ;
+- `previous` correspond à l'observation strictement antérieure ;
+- `id DESC` sert uniquement de critère déterministe lorsque plusieurs lignes
+  partagent le même `observed_at`.
+
+Les sources utilisées sont explicites :
+
+- `BTC_DOM` provient de `source="coingecko"` ;
+- `STABLECOIN_DOM`, `ETH_BTC` et `TOTAL3` proviennent de
+  `source="derived"`.
+
+Les métriques dérivées du snapshot courant sont persistées avant le calcul des
+signaux. La même connexion SQLite peut alors comparer le snapshot courant au
+snapshot dérivé précédent.
+
+Lorsqu'une métrique ne possède pas deux observations distinctes :
+
+- son signal n'est pas calculé ;
+- les détails `<SYMBOL>_PREVIOUS` et `<SYMBOL>_CURRENT` ne sont pas produits
+  pour cette comparaison ;
+- `MARKET_REGIME_SCORE` et `MARKET_REGIME_STATE` ne sont pas persistés si les
+  quatre signaux ne sont pas disponibles.
+
+Une absence d'historique signifie « données insuffisantes » et ne doit jamais
+être interprétée comme un signal neutre.
+
+Ce contrat doit rester identique dans le calcul Python, les détails persistés,
+les requêtes Grafana et les tests automatisés.
 
 ---
 
@@ -402,13 +423,14 @@ nécessaires à une collecte réelle.
 
 ## 11. Roadmap et critère de fin
 
-Le Sprint 1 est documenté comme terminé. La roadmap laisse le Sprint 2 Crypto
-Market Regime non coché alors que la V1 existe dans le code et le dashboard ;
-elle doit être synchronisée lors de la prochaine évolution de ce périmètre.
+Le Sprint 1 et le périmètre fonctionnel du Crypto Market Regime V1 sont
+documentés comme terminés. La roadmap distingue les fonctionnalités livrées,
+les travaux de fiabilisation et les extensions futures comme BTC Trend et
+Crypto Weather.
 
 Priorité recommandée :
 
-1. fiabiliser les snapshots et signaux crypto, avec tests ;
+1. Ajouter les tests automatisés du contrat temporel des signaux ;
 2. synchroniser code, documentation du régime et roadmap ;
 3. compléter, seulement après spécification, volume global, tendance BTC et
    Crypto Weather ;
