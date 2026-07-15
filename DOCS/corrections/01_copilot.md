@@ -41,7 +41,9 @@ latest AS (
 )
 ```
 
-5.3 Source non filtrée dans plusieurs panneaux crypto
-5.4 Gestion SQL des valeurs absentes
-5.5 Synchronisation contradictoire de la roadmap
-5.6 Commandes de diagnostic à mieux formater
+## 5.3 Source non filtrée dans plusieurs panneaux crypto
+> voir [diff_5.3.txt](diff_5.3.txt)
+
+## 5.4 Gestion SQL des valeurs absentes
+## 5.5 Synchronisation contradictoire de la roadmap
+## 5.6 Commandes de diagnostic à mieux formater
