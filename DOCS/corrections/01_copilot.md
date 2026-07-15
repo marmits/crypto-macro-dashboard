@@ -45,5 +45,9 @@ latest AS (
 > voir [diff_5.3.txt](diff_5.3.txt)
 
 ## 5.4 Gestion SQL des valeurs absentes
+> voir [diff_5.4.txt](diff_5.4.txt)
+ 
 ## 5.5 Synchronisation contradictoire de la roadmap
+> voir [diff_5.5.txt](diff_5.5.txt)
+
 ## 5.6 Commandes de diagnostic à mieux formater
