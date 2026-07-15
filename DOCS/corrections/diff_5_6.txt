@@ -1,0 +1,424 @@
+diff --git a/DOCS/prompts/09-prompt-actif.md b/DOCS/prompts/09-prompt-actif.md
+index 473affd..82f9eec 100644
+--- a/DOCS/prompts/09-prompt-actif.md
++++ b/DOCS/prompts/09-prompt-actif.md
+@@ -395,30 +395,407 @@ vers le collecteur.
+   concernés.
+ - Ne jamais écrire de secrets dans code, dashboard, logs, exemples ou commits.
+ 
+-Commandes de diagnostic usuelles :
++### Commandes de diagnostic
++
++Les commandes suivantes sont à exécuter depuis la racine du projet.
++
++#### Vérifier la configuration Docker Compose
++
++```bash
++docker compose config --quiet
++docker info >/dev/null
++```
++
++Les avertissements relatifs à `blkio` ou à la dépréciation de cgroup v1
++n'empêchent pas nécessairement l'exécution du collecteur. Le code de sortie
++des commandes et les erreurs explicites restent les éléments déterminants.
++
++#### Démarrer les services nécessaires
++
++```bash
++docker compose up -d sqlite grafana
++```
++
++Vérifier leur état :
++
++```bash
++docker compose ps
++```
++
++#### Afficher l'aide du script de rafraîchissement
++
++```bash
++./scripts/refresh-data.sh --help
++```
++
++#### Reconstruire et exécuter le collecteur
++
++Exécution normale avec reconstruction de l'image du collecteur :
++
++```bash
++./scripts/refresh-data.sh
++```
++
++Exécution sans reconstruction lorsque le code du collecteur n'a pas changé :
++
++```bash
++./scripts/refresh-data.sh --skip-build
++```
++
++Exécution avec validation stricte du contrat du régime crypto :
++
++```bash
++./scripts/refresh-data.sh --strict
++```
++
++Exécution stricte sans reconstruction :
++
++```bash
++./scripts/refresh-data.sh --strict --skip-build
++```
++
++Les variables d'environnement historiques restent utilisables :
++
++```bash
++STRICT_DATA_CONTRACT=1 \
++SKIP_COLLECTOR_BUILD=1 \
++./scripts/refresh-data.sh
++```
++
++#### Exécuter directement le service collector
++
++Cette commande est utile pour isoler le collecteur du script d'exploitation :
++
++```bash
++docker compose build collector
++docker compose run --rm --no-deps collector
++```
++
++#### Afficher les journaux
+ 
+ ```bash
+-docker compose up -d grafana sqlite
+-docker compose run --rm collector
+ docker compose logs --tail=200 collector
++```
++
++Pour suivre les journaux en continu :
+ 
+-docker compose exec sqlite sqlite3 -header -column /data/macro.db "
+-SELECT source, symbol, value, unit, observed_at
++```bash
++docker compose logs --follow collector
++```
++
++#### Vérifier la présence et la fraîcheur des séries principales
++
++```bash
++docker compose exec sqlite sqlite3 \
++  -header \
++  -column \
++  /data/macro.db "
++SELECT
++    source,
++    symbol,
++    COUNT(*) AS observations,
++    MAX(observed_at) AS derniere_observation,
++    MAX(updated_at) AS derniere_mise_a_jour
+ FROM macro_series
+ WHERE symbol IN (
+-  'VIX', 'USD_BROAD', 'US2Y', 'US10Y', 'WTI', 'BRENT',
+-  'BTC_DOM', 'STABLECOIN_DOM', 'ETH_BTC', 'TOTAL3',
+-  'MARKET_REGIME_SCORE', 'MARKET_REGIME_STATE'
++    'VIX',
++    'USD_BROAD',
++    'US2Y',
++    'US10Y',
++    'WTI',
++    'BRENT',
++    'BTC',
++    'ETH',
++    'SOL',
++    'HYPE',
++    'BTC_DOM',
++    'STABLECOIN_DOM',
++    'ETH_BTC',
++    'TOTAL3',
++    'BTC_DOM_SIGNAL',
++    'STABLECOIN_SIGNAL',
++    'ETH_BTC_SIGNAL',
++    'TOTAL3_SIGNAL',
++    'MARKET_REGIME_SCORE',
++    'MARKET_REGIME_STATE'
++)
++GROUP BY source, symbol
++ORDER BY source, symbol;
++"
++```
++
++#### Vérifier les deux derniers snapshots des métriques de signal
++
++```bash
++docker compose exec sqlite sqlite3 \
++  -header \
++  -column \
++  /data/macro.db "
++WITH ranked AS (
++    SELECT
++        source,
++        symbol,
++        value,
++        unit,
++        observed_at,
++        id,
++        ROW_NUMBER() OVER (
++            PARTITION BY source, symbol
++            ORDER BY observed_at DESC, id DESC
++        ) AS row_number
++    FROM macro_series
++    WHERE
++        (
++            source = 'coingecko'
++            AND symbol = 'BTC_DOM'
++        )
++        OR
++        (
++            source = 'derived'
++            AND symbol IN (
++                'STABLECOIN_DOM',
++                'ETH_BTC',
++                'TOTAL3'
++            )
++        )
+ )
+-ORDER BY observed_at DESC, id DESC;
++SELECT
++    source,
++    symbol,
++    value,
++    unit,
++    observed_at,
++    row_number
++FROM ranked
++WHERE row_number <= 2
++ORDER BY symbol, row_number;
++"
++```
++
++Le résultat attendu contient au maximum deux lignes par métrique :
++
++- `row_number = 1` correspond au snapshot courant ;
++- `row_number = 2` correspond au snapshot précédent ;
++- les deux lignes doivent posséder des valeurs de `observed_at` distinctes.
++
++#### Vérifier les signaux et leurs valeurs explicatives
++
++```bash
++docker compose exec sqlite sqlite3 \
++  -header \
++  -column \
++  /data/macro.db "
++SELECT
++    symbol,
++    value,
++    unit,
++    observed_at
++FROM macro_series
++WHERE source = 'derived'
++  AND (
++      symbol LIKE '%_SIGNAL'
++      OR symbol LIKE '%_PREVIOUS'
++      OR symbol LIKE '%_CURRENT'
++      OR symbol IN (
++          'MARKET_REGIME_SCORE',
++          'MARKET_REGIME_STATE'
++      )
++  )
++ORDER BY observed_at DESC, id DESC
++LIMIT 50;
++"
++```
++
++Pour un snapshot complet, les quatre signaux suivants doivent être présents :
++
++```text
++BTC_DOM_SIGNAL
++STABLECOIN_SIGNAL
++ETH_BTC_SIGNAL
++TOTAL3_SIGNAL
++```
++
++Le score et l'état ne doivent être produits que si ces quatre signaux sont
++calculables.
++
++#### Vérifier la cohérence du dernier score
++
++```bash
++docker compose exec sqlite sqlite3 \
++  -header \
++  -column \
++  /data/macro.db "
++WITH latest AS (
++    SELECT
++        symbol,
++        value,
++        ROW_NUMBER() OVER (
++            PARTITION BY source, symbol
++            ORDER BY observed_at DESC, id DESC
++        ) AS row_number
++    FROM macro_series
++    WHERE source = 'derived'
++      AND symbol IN (
++          'BTC_DOM_SIGNAL',
++          'STABLECOIN_SIGNAL',
++          'ETH_BTC_SIGNAL',
++          'TOTAL3_SIGNAL',
++          'MARKET_REGIME_SCORE',
++          'MARKET_REGIME_STATE'
++      )
++),
++values_pivot AS (
++    SELECT
++        MAX(
++            CASE
++                WHEN symbol = 'BTC_DOM_SIGNAL'
++                AND row_number = 1
++                THEN value
++            END
++        ) AS btc_dom_signal,
++        MAX(
++            CASE
++                WHEN symbol = 'STABLECOIN_SIGNAL'
++                AND row_number = 1
++                THEN value
++            END
++        ) AS stablecoin_signal,
++        MAX(
++            CASE
++                WHEN symbol = 'ETH_BTC_SIGNAL'
++                AND row_number = 1
++                THEN value
++            END
++        ) AS eth_btc_signal,
++        MAX(
++            CASE
++                WHEN symbol = 'TOTAL3_SIGNAL'
++                AND row_number = 1
++                THEN value
++            END
++        ) AS total3_signal,
++        MAX(
++            CASE
++                WHEN symbol = 'MARKET_REGIME_SCORE'
++                AND row_number = 1
++                THEN value
++            END
++        ) AS stored_score,
++        MAX(
++            CASE
++                WHEN symbol = 'MARKET_REGIME_STATE'
++                AND row_number = 1
++                THEN value
++            END
++        ) AS stored_state
++    FROM latest
++)
++SELECT
++    btc_dom_signal,
++    stablecoin_signal,
++    eth_btc_signal,
++    total3_signal,
++    (
++        btc_dom_signal
++        + stablecoin_signal
++        + eth_btc_signal
++        + total3_signal
++    ) AS calculated_score,
++    stored_score,
++    stored_state
++FROM values_pivot;
++"
++```
++
++`calculated_score` doit être égal à `stored_score`.
++
++#### Rechercher les symboles présents sous plusieurs sources
++
++```bash
++docker compose exec sqlite sqlite3 \
++  -header \
++  -column \
++  /data/macro.db "
++SELECT
++    symbol,
++    COUNT(DISTINCT source) AS nombre_sources,
++    GROUP_CONCAT(DISTINCT source) AS sources
++FROM macro_series
++GROUP BY symbol
++HAVING COUNT(DISTINCT source) > 1
++ORDER BY symbol;
+ "
++```
++
++Une ligne retournée n'est pas nécessairement une erreur, mais les panneaux
++Grafana concernés doivent alors filtrer explicitement la source attendue.
++
++#### Valider le code Python du collecteur
++
++```bash
++python3 -m py_compile \
++  collector/main.py \
++  collector/derived.py \
++  collector/storage.py
++```
+ 
+-python3 -m json.tool grafana/dashboards/crypto-macro-overview.json >/dev/null
++#### Valider le JSON Grafana
++
++```bash
++python3 -m json.tool \
++  grafana/dashboards/crypto-macro-overview.json \
++  >/dev/null
+ ```
+ 
+-Adapter l'exécution au contexte : Docker, `.env` et accès réseau aux APIs sont
+-nécessaires à une collecte réelle.
++Si `jq` est disponible, vérifier la requête du panneau `Score Explanation` :
++
++```bash
++jq -r '
++  .panels[]
++  | select(.id == 43)
++  | .targets[0].queryText
++' grafana/dashboards/crypto-macro-overview.json
++```
++
++La requête doit notamment :
++
++- sélectionner la dernière observation avec `observed_at DESC, id DESC` ;
++- filtrer `source = 'derived'` ;
++- afficher `N/D` ou `Données insuffisantes` lorsque les données nécessaires
++  sont absentes.
++
++#### Vérifier les modifications Git
++
++```bash
++git status --short
++git diff --check
++git diff --stat
++```
++
++Examiner les fichiers principaux :
++
++```bash
++git diff -- \
++  collector/derived.py \
++  grafana/dashboards/crypto-macro-overview.json \
++  DOCS/05-crypto-market-regime.md \
++  DOCS/99-roadmap.md \
++  DOCS/prompts/09-prompt-actif.md
++```
++
++### Contraintes d'exécution
++
++Une collecte réelle nécessite :
++
++- un moteur Docker accessible ;
++- le fichier `.env` attendu par Docker Compose ;
++- une clé FRED valide ;
++- un accès réseau aux API FRED et CoinGecko ;
++- le volume SQLite monté sur `/data/macro.db`.
+ 
++CoinGecko peut être utilisé en mode public sans clé ou en mode Demo
++authentifié selon la configuration du collecteur. En cas de réponse HTTP 429,
++ne pas relancer le collecteur en boucle.
+ ---
+ 
+ ## 11. Roadmap et critère de fin

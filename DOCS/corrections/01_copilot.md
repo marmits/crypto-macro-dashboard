@@ -51,3 +51,4 @@ latest AS (
 > voir [diff_5.5.txt](diff_5.5.txt)
 
 ## 5.6 Commandes de diagnostic à mieux formater
+> voir [diff_5.6.txt](diff_5.6.txt)
