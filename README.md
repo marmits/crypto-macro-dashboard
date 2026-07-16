@@ -16,3 +16,6 @@ http://localhost:9070
 FRED_API_KEY=
 COINGECKO_API_KEY=
 ```
+
+## Lancer le collector
+`docker compose run --rm collector`
