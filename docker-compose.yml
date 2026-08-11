@@ -15,6 +15,7 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
       - ./data:/data
+      - /opt/docker/freqtrade/user_data/data:/data/hyperliquid:ro
 
   collector:
     build:
